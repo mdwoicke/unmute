@@ -5,6 +5,7 @@ The LiveKit agent discovers and calls these tools via MCP protocol.
 Data sourced from ESPN public API (no API key required).
 """
 
+import re
 import httpx
 from datetime import datetime, timedelta
 from mcp.server.fastmcp import FastMCP
@@ -19,6 +20,14 @@ LEAGUES = {
 }
 
 ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports"
+
+# Sport-specific phrasing for upcoming ("pre") games
+_UPCOMING_PHRASE = {
+    "nba": "tip off at",
+    "nfl": "kick off at",
+    "mlb": "first pitch is at",
+    "nhl": "puck drops at",
+}
 
 
 def _validate_league(league: str) -> tuple[str, str | None]:
@@ -57,12 +66,79 @@ def _clean_detail(detail: str) -> str:
     return result
 
 
-def _format_scores_utterance(events_data: list[dict]) -> str:
+def _relative_date(detail: str) -> str:
+    """Convert an ESPN shortDetail date string to relative spoken phrasing.
+
+    Handles formats like "3/30 - 7:30 PM ET" or "Sat 3/30 at 7:30 PM ET".
+    Returns phrases like "today at 7 30 PM Eastern" or "this Saturday at 7 30 PM Eastern".
+    Falls back to _clean_detail(detail) if parsing fails.
+    """
+    def _et_to_eastern(s: str) -> str:
+        return re.sub(r"\bET\b", "Eastern", s)
+
+    def _clean_time(t: str) -> str:
+        # "7:30 PM Eastern" -> "7 30 PM Eastern"
+        return t.replace(":", " ")
+
+    # Match patterns like:
+    #   "3/30 - 7:30 PM ET"
+    #   "Sat 3/30 at 7:30 PM ET"
+    #   "3/30 at 7:30 PM ET"
+    pattern = re.compile(
+        r"(?:\w+\s+)?(\d{1,2})/(\d{1,2})"   # optional weekday, then M/D
+        r"(?:\s*[-\u2013at]+\s*)"             # separator: dash, en-dash, or "at"
+        r"(\d{1,2}:\d{2}\s*[AP]M\s*ET)",     # time like "7:30 PM ET"
+        re.IGNORECASE,
+    )
+    m = pattern.search(detail)
+    if not m:
+        return _clean_detail(detail)
+
+    month = int(m.group(1))
+    day = int(m.group(2))
+    time_str = m.group(3).strip()
+
+    now = datetime.now()
+    try:
+        game_dt = datetime(now.year, month, day)
+    except ValueError:
+        return _clean_detail(detail)
+
+    # Advance year if the date has already passed this calendar year
+    if game_dt.date() < now.date():
+        try:
+            game_dt = datetime(now.year + 1, month, day)
+        except ValueError:
+            return _clean_detail(detail)
+
+    delta_days = (game_dt.date() - now.date()).days
+    spoken_time = _clean_time(_et_to_eastern(time_str))
+
+    if delta_days == 0:
+        return f"today at {spoken_time}"
+    elif delta_days == 1:
+        return f"tomorrow at {spoken_time}"
+    elif 2 <= delta_days <= 6:
+        weekday = game_dt.strftime("%A")  # e.g. "Saturday"
+        return f"this {weekday} at {spoken_time}"
+    else:
+        # Beyond 6 days — fall back to cleaned raw detail
+        return _clean_detail(detail)
+
+
+def _upcoming_phrase(league: str) -> str:
+    """Return the sport-specific verb phrase for an upcoming game."""
+    return _UPCOMING_PHRASE.get(league.strip().lower(), "tip off at")
+
+
+def _format_scores_utterance(events_data: list[dict], league: str) -> str:
     """Format a list of parsed event dicts into a voice-ready spoken paragraph.
 
     Args:
         events_data: List of dicts with keys: away_name, home_name,
                      away_score, home_score, state, detail
+        league: Lowercase league key (nba, nfl, mlb, nhl) used for
+                sport-specific phrasing of upcoming games.
 
     Returns:
         A single paragraph of spoken sentences describing the scores.
@@ -74,6 +150,8 @@ def _format_scores_utterance(events_data: list[dict]) -> str:
     cap = 5
     truncated = max(0, len(sorted_events) - cap)
     display = sorted_events[:cap]
+
+    phrase = _upcoming_phrase(league)
 
     sentences = []
     for ev in display:
@@ -125,7 +203,7 @@ def _format_scores_utterance(events_data: list[dict]) -> str:
                 )
 
         else:  # "pre" or unknown — upcoming
-            sentences.append(f"The {away} and the {home} tip off at {detail}.")
+            sentences.append(f"The {away} and the {home} {phrase} {detail}.")
 
     if truncated > 0:
         sentences.append(f"There are also {truncated} other games scheduled.")
@@ -215,13 +293,15 @@ def _standings_sentence(group_name: str, entries: list[dict]) -> str:
         )
 
 
-def _format_schedule_utterance(events_data: list[dict], team: str) -> str:
+def _format_schedule_utterance(events_data: list[dict], team: str, league: str) -> str:
     """Format parsed schedule event dicts into a voice-ready spoken paragraph.
 
     Args:
         events_data: List of dicts with keys: away_name, home_name,
                      away_score, home_score, state, detail
         team: The team filter string (empty string means all teams).
+        league: Lowercase league key (nba, nfl, mlb, nhl) used for
+                sport-specific phrasing of upcoming games.
 
     Returns:
         A single paragraph of spoken sentences describing upcoming games.
@@ -229,21 +309,24 @@ def _format_schedule_utterance(events_data: list[dict], team: str) -> str:
     cap = 3 if team else 5
     display = events_data[:cap]
 
+    phrase = _upcoming_phrase(league)
+
     sentences = []
     for ev in display:
         away = ev["away_name"]
         home = ev["home_name"]
-        detail = _clean_detail(ev["detail"])
         state = ev["state"]
 
         if state == "pre":
+            detail = _relative_date(ev["detail"])
             team_lower = team.strip().lower()
             if team_lower and team_lower in home.lower():
-                sentences.append(f"The {home} host the {away} on {detail}.")
+                sentences.append(f"The {home} host the {away}, {phrase} {detail}.")
             else:
-                sentences.append(f"The {away} play at the {home} on {detail}.")
+                sentences.append(f"The {away} visit the {home}, {phrase} {detail}.")
         else:
             # Game in progress or final — include score
+            detail = _clean_detail(ev["detail"])
             away_sc = ev.get("away_score", "0")
             home_sc = ev.get("home_score", "0")
             sentences.append(
@@ -315,7 +398,7 @@ def get_scores(league: str) -> str:
     if not events_data:
         return f"No {league.upper()} games found today."
 
-    return _format_scores_utterance(events_data)
+    return _format_scores_utterance(events_data, league.strip().lower())
 
 
 @mcp.tool()
@@ -345,6 +428,7 @@ def get_team_score(team: str, league: str) -> str:
 
     events = data.get("events", [])
     team_lower = team.strip().lower()
+    league_key = league.strip().lower()
 
     for event in events:
         competitions = event.get("competitions", [])
@@ -375,15 +459,6 @@ def get_team_score(team: str, league: str) -> str:
         detail = status_type.get("shortDetail", "")
         home_score = home.get("score", "0")
         away_score = away.get("score", "0")
-
-        ev = {
-            "away_name": away_name,
-            "home_name": home_name,
-            "away_score": away_score,
-            "home_score": home_score,
-            "state": state,
-            "detail": detail,
-        }
 
         # Format a single-game utterance using the same style as _format_scores_utterance
         detail_clean = _clean_detail(detail)
@@ -419,7 +494,9 @@ def get_team_score(team: str, league: str) -> str:
                 return f"The {home_name} beat the {away_name} {home_sc} to {away_sc}."
 
         else:  # "pre" or unknown — upcoming
-            return f"The {away_name} and the {home_name} tip off at {detail_clean}."
+            phrase = _upcoming_phrase(league_key)
+            upcoming_detail = _clean_detail(detail)
+            return f"The {away_name} and the {home_name} {phrase} {upcoming_detail}."
 
     return f"I couldn't find a game for {team} in the {league} today."
 
@@ -540,7 +617,7 @@ def get_schedule(league: str, team: str = "") -> str:
             return f"No upcoming {league.upper()} games found for '{team}' in the next 7 days."
         return f"No upcoming {league.upper()} games found in the next 7 days."
 
-    return _format_schedule_utterance(events_data, team)
+    return _format_schedule_utterance(events_data, team, league.strip().lower())
 
 
 if __name__ == "__main__":
