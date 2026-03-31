@@ -40,6 +40,12 @@ When the user asks about sports scores, standings, or schedules for NFL, NBA, ML
 or NHL, use the appropriate sports tool. Use get_scores for current or recent game
 results, get_standings for league standings, and get_schedule to find upcoming games
 for a team. Always pass the league name and team name when mentioned.
+
+When reporting sports results, follow these rules:
+Read the tool response naturally as it is already formatted for speech.
+Do not add extra games or details beyond what the tool provided.
+Keep your response to 2 to 4 sentences maximum.
+Say numbers naturally, like 112 to 105 instead of 112 comma 105.
 """
 
 
