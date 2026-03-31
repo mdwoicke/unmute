@@ -33,6 +33,226 @@ def _validate_league(league: str) -> tuple[str, str | None]:
     return path, None
 
 
+def _clean_detail(detail: str) -> str:
+    """Clean ESPN shortDetail text for natural speech.
+
+    Replaces ordinal abbreviations with spelled-out words, expands OT,
+    lowercases period/quarter/half labels, and strips stray dashes.
+    """
+    replacements = [
+        ("1st", "first"),
+        ("2nd", "second"),
+        ("3rd", "third"),
+        ("4th", "fourth"),
+        ("OT", "overtime"),
+        ("Quarter", "quarter"),
+        ("Period", "period"),
+        ("Half", "half"),
+    ]
+    result = detail
+    for old, new in replacements:
+        result = result.replace(old, new)
+    # Remove stray leading/trailing dashes and extra whitespace
+    result = result.strip(" -")
+    return result
+
+
+def _format_scores_utterance(events_data: list[dict]) -> str:
+    """Format a list of parsed event dicts into a voice-ready spoken paragraph.
+
+    Args:
+        events_data: List of dicts with keys: away_name, home_name,
+                     away_score, home_score, state, detail
+
+    Returns:
+        A single paragraph of spoken sentences describing the scores.
+    """
+    # Sort: live first, then final, then upcoming
+    order = {"in": 0, "post": 1, "pre": 2}
+    sorted_events = sorted(events_data, key=lambda e: order.get(e["state"], 3))
+
+    cap = 5
+    truncated = max(0, len(sorted_events) - cap)
+    display = sorted_events[:cap]
+
+    sentences = []
+    for ev in display:
+        state = ev["state"]
+        away = ev["away_name"]
+        home = ev["home_name"]
+        detail = _clean_detail(ev["detail"])
+
+        if state == "in":
+            try:
+                away_sc = int(ev["away_score"])
+                home_sc = int(ev["home_score"])
+            except (ValueError, TypeError):
+                away_sc = home_sc = 0
+
+            if away_sc > home_sc:
+                leader, trailer, high, low = away, home, away_sc, home_sc
+            elif home_sc > away_sc:
+                leader, trailer, high, low = home, away, home_sc, away_sc
+            else:
+                # Tied while live
+                sentences.append(
+                    f"The {away} and the {home} are tied at {away_sc} in the {detail}."
+                )
+                continue
+
+            sentences.append(
+                f"The {leader} lead the {trailer} {high} to {low} in the {detail}."
+            )
+
+        elif state == "post":
+            try:
+                away_sc = int(ev["away_score"])
+                home_sc = int(ev["home_score"])
+            except (ValueError, TypeError):
+                away_sc = home_sc = 0
+
+            if away_sc == home_sc:
+                sentences.append(
+                    f"The {away} and the {home} tied at {away_sc}."
+                )
+            elif away_sc > home_sc:
+                sentences.append(
+                    f"The {away} beat the {home} {away_sc} to {home_sc}."
+                )
+            else:
+                sentences.append(
+                    f"The {home} beat the {away} {home_sc} to {away_sc}."
+                )
+
+        else:  # "pre" or unknown — upcoming
+            sentences.append(f"The {away} and the {home} tip off at {detail}.")
+
+    if truncated > 0:
+        sentences.append(f"There are also {truncated} other games scheduled.")
+
+    return " ".join(sentences)
+
+
+def _format_standings_utterance(children: list[dict]) -> str:
+    """Format ESPN standings children into a voice-ready spoken paragraph.
+
+    Args:
+        children: The top-level list from the ESPN standings response's
+                  'children' key.
+
+    Returns:
+        A single paragraph of spoken sentences summarising top standings.
+    """
+    sentences = []
+    group_count = 0
+    has_more = False
+
+    for group in children:
+        if group_count >= 2:
+            has_more = True
+            break
+
+        group_name = group.get("name", "Unknown")
+        sub_groups = group.get("children", [])
+
+        if sub_groups:
+            # Divisions within conferences — pick first 2 sub-groups
+            for sub_idx, sub in enumerate(sub_groups):
+                if sub_idx >= 2:
+                    break
+                sub_name = sub.get("name", "")
+                label = f"{group_name} {sub_name}".strip()
+                entries = sub.get("standings", {}).get("entries", [])[:3]
+                sentence = _standings_sentence(label, entries)
+                if sentence:
+                    sentences.append(sentence)
+        else:
+            entries = group.get("standings", {}).get("entries", [])[:3]
+            sentence = _standings_sentence(group_name, entries)
+            if sentence:
+                sentences.append(sentence)
+
+        group_count += 1
+
+    if has_more:
+        sentences.append("There are more divisions in the standings.")
+
+    return " ".join(sentences)
+
+
+def _standings_sentence(group_name: str, entries: list[dict]) -> str:
+    """Build one standings sentence for up to 3 teams in a group."""
+    if not entries:
+        return ""
+
+    def record(entry: dict) -> tuple[str, str, str]:
+        team_name = entry.get("team", {}).get("shortDisplayName", "Unknown")
+        stats = {s["name"]: s["displayValue"] for s in entry.get("stats", [])}
+        wins = stats.get("wins", "0")
+        losses = stats.get("losses", "0")
+        return team_name, wins, losses
+
+    if len(entries) == 1:
+        t1, w1, l1 = record(entries[0])
+        return (
+            f"In the {group_name}, the {t1} lead at {w1} and {l1}."
+        )
+    elif len(entries) == 2:
+        t1, w1, l1 = record(entries[0])
+        t2, w2, l2 = record(entries[1])
+        return (
+            f"In the {group_name}, the {t1} lead at {w1} and {l1}, "
+            f"followed by the {t2} at {w2} and {l2}."
+        )
+    else:
+        t1, w1, l1 = record(entries[0])
+        t2, w2, l2 = record(entries[1])
+        t3, w3, l3 = record(entries[2])
+        return (
+            f"In the {group_name}, the {t1} lead at {w1} and {l1}, "
+            f"followed by the {t2} at {w2} and {l2} "
+            f"and the {t3} at {w3} and {l3}."
+        )
+
+
+def _format_schedule_utterance(events_data: list[dict], team: str) -> str:
+    """Format parsed schedule event dicts into a voice-ready spoken paragraph.
+
+    Args:
+        events_data: List of dicts with keys: away_name, home_name,
+                     away_score, home_score, state, detail
+        team: The team filter string (empty string means all teams).
+
+    Returns:
+        A single paragraph of spoken sentences describing upcoming games.
+    """
+    cap = 3 if team else 5
+    display = events_data[:cap]
+
+    sentences = []
+    for ev in display:
+        away = ev["away_name"]
+        home = ev["home_name"]
+        detail = _clean_detail(ev["detail"])
+        state = ev["state"]
+
+        if state == "pre":
+            team_lower = team.strip().lower()
+            if team_lower and team_lower in home.lower():
+                sentences.append(f"The {home} host the {away} on {detail}.")
+            else:
+                sentences.append(f"The {away} play at the {home} on {detail}.")
+        else:
+            # Game in progress or final — include score
+            away_sc = ev.get("away_score", "0")
+            home_sc = ev.get("home_score", "0")
+            sentences.append(
+                f"The {away} lead the {home} {away_sc} to {home_sc} in the {detail}."
+            )
+
+    return " ".join(sentences)
+
+
 @mcp.tool()
 def get_scores(league: str) -> str:
     """Get live and recent game scores for a league.
@@ -41,7 +261,7 @@ def get_scores(league: str) -> str:
         league: The league to get scores for: nfl, nba, mlb, or nhl
 
     Returns:
-        Human-readable summary of current/recent game scores
+        A brief spoken summary of the most notable current scores
     """
     sport_path, error = _validate_league(league)
     if error:
@@ -61,9 +281,8 @@ def get_scores(league: str) -> str:
     if not events:
         return f"No {league.upper()} games found today."
 
-    lines = []
+    events_data = []
     for event in events:
-        name = event.get("name", "Unknown")
         status_obj = event.get("status", {})
         status_type = status_obj.get("type", {})
         state = status_type.get("state", "")
@@ -71,27 +290,32 @@ def get_scores(league: str) -> str:
 
         competitions = event.get("competitions", [])
         if not competitions:
-            lines.append(f"{name} - {detail}")
             continue
 
         competitors = competitions[0].get("competitors", [])
-        if len(competitors) == 2:
-            home = competitors[0]
-            away = competitors[1]
-            home_name = home.get("team", {}).get("shortDisplayName", "Home")
-            away_name = away.get("team", {}).get("shortDisplayName", "Away")
-            home_score = home.get("score", "0")
-            away_score = away.get("score", "0")
+        if len(competitors) != 2:
+            continue
 
-            if state == "pre":
-                game_date = status_obj.get("type", {}).get("shortDetail", "Scheduled")
-                lines.append(f"{away_name} at {home_name} - {game_date}")
-            else:
-                lines.append(f"{away_name} {away_score}, {home_name} {home_score} - {detail}")
-        else:
-            lines.append(f"{name} - {detail}")
+        home = competitors[0]
+        away = competitors[1]
+        home_name = home.get("team", {}).get("shortDisplayName", "Home")
+        away_name = away.get("team", {}).get("shortDisplayName", "Away")
+        home_score = home.get("score", "0")
+        away_score = away.get("score", "0")
 
-    return "\n".join(lines)
+        events_data.append({
+            "away_name": away_name,
+            "home_name": home_name,
+            "away_score": away_score,
+            "home_score": home_score,
+            "state": state,
+            "detail": detail,
+        })
+
+    if not events_data:
+        return f"No {league.upper()} games found today."
+
+    return _format_scores_utterance(events_data)
 
 
 @mcp.tool()
@@ -102,7 +326,7 @@ def get_standings(league: str) -> str:
         league: The league to get standings for: nfl, nba, mlb, or nhl
 
     Returns:
-        Human-readable standings grouped by division or conference
+        A brief spoken summary of top teams in each division
     """
     sport_path, error = _validate_league(league)
     if error:
@@ -122,35 +346,7 @@ def get_standings(league: str) -> str:
     if not children:
         return f"No {league.upper()} standings available."
 
-    lines = []
-    for group in children:
-        group_name = group.get("name", "Unknown")
-
-        # Some leagues have sub-groups (divisions within conferences)
-        sub_groups = group.get("children", [])
-        if sub_groups:
-            for sub in sub_groups:
-                sub_name = sub.get("name", "")
-                header = f"{group_name} - {sub_name}" if sub_name else group_name
-                lines.append(header + ":")
-                standings = sub.get("standings", {}).get("entries", [])
-                for i, entry in enumerate(standings, 1):
-                    team_name = entry.get("team", {}).get("shortDisplayName", "Unknown")
-                    stats = {s["name"]: s["displayValue"] for s in entry.get("stats", [])}
-                    wins = stats.get("wins", "0")
-                    losses = stats.get("losses", "0")
-                    lines.append(f"  {i}. {team_name} ({wins}-{losses})")
-        else:
-            lines.append(f"{group_name}:")
-            standings = group.get("standings", {}).get("entries", [])
-            for i, entry in enumerate(standings, 1):
-                team_name = entry.get("team", {}).get("shortDisplayName", "Unknown")
-                stats = {s["name"]: s["displayValue"] for s in entry.get("stats", [])}
-                wins = stats.get("wins", "0")
-                losses = stats.get("losses", "0")
-                lines.append(f"  {i}. {team_name} ({wins}-{losses})")
-
-    return "\n".join(lines)
+    return _format_standings_utterance(children)
 
 
 @mcp.tool()
@@ -162,7 +358,7 @@ def get_schedule(league: str, team: str = "") -> str:
         team: Optional team name to filter by (e.g. 'Lakers', 'Yankees'). If empty, shows all upcoming games.
 
     Returns:
-        Human-readable list of upcoming games
+        A brief spoken summary of upcoming games
     """
     sport_path, error = _validate_league(league)
     if error:
@@ -191,7 +387,7 @@ def get_schedule(league: str, team: str = "") -> str:
         return f"No upcoming {league.upper()} games found in the next 7 days."
 
     team_lower = team.strip().lower()
-    lines = []
+    events_data = []
 
     for event in events:
         competitions = event.get("competitions", [])
@@ -221,20 +417,24 @@ def get_schedule(league: str, team: str = "") -> str:
         status_obj = event.get("status", {})
         detail = status_obj.get("type", {}).get("shortDetail", "TBD")
         state = status_obj.get("type", {}).get("state", "")
+        home_score = home.get("score", "0")
+        away_score = away.get("score", "0")
 
-        if state == "pre":
-            lines.append(f"{away_name} at {home_name} - {detail}")
-        else:
-            home_score = home.get("score", "0")
-            away_score = away.get("score", "0")
-            lines.append(f"{away_name} {away_score}, {home_name} {home_score} - {detail}")
+        events_data.append({
+            "away_name": away_name,
+            "home_name": home_name,
+            "away_score": away_score,
+            "home_score": home_score,
+            "state": state,
+            "detail": detail,
+        })
 
-    if not lines:
+    if not events_data:
         if team_lower:
             return f"No upcoming {league.upper()} games found for '{team}' in the next 7 days."
         return f"No upcoming {league.upper()} games found in the next 7 days."
 
-    return "\n".join(lines)
+    return _format_schedule_utterance(events_data, team)
 
 
 if __name__ == "__main__":
