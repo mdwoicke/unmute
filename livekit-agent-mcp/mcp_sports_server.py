@@ -9,7 +9,7 @@ import httpx
 from datetime import datetime, timedelta
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("Sports MCP Server")
+mcp = FastMCP("Sports MCP Server", port=8001)
 
 LEAGUES = {
     "nfl": "football/nfl",
@@ -238,4 +238,4 @@ def get_schedule(league: str, team: str = "") -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="sse", port=8001)
+    mcp.run(transport="sse")
