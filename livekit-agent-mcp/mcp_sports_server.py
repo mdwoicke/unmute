@@ -319,6 +319,112 @@ def get_scores(league: str) -> str:
 
 
 @mcp.tool()
+def get_team_score(team: str, league: str) -> str:
+    """Get the score for a specific team's current or most recent game.
+
+    Args:
+        team: Team name to look up (e.g. 'Lakers', 'Yankees', 'Chiefs')
+        league: The league: nfl, nba, mlb, or nhl
+
+    Returns:
+        A spoken sentence describing the team's current game score or result
+    """
+    sport_path, error = _validate_league(league)
+    if error:
+        return error
+
+    url = f"{ESPN_BASE}/{sport_path}/scoreboard"
+
+    with httpx.Client(timeout=10) as client:
+        try:
+            resp = client.get(url)
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception as e:
+            return f"Failed to fetch {league.upper()} scores: {e}"
+
+    events = data.get("events", [])
+    team_lower = team.strip().lower()
+
+    for event in events:
+        competitions = event.get("competitions", [])
+        if not competitions:
+            continue
+
+        competitors = competitions[0].get("competitors", [])
+        if len(competitors) != 2:
+            continue
+
+        home = competitors[0]
+        away = competitors[1]
+        home_name = home.get("team", {}).get("shortDisplayName", "Home")
+        away_name = away.get("team", {}).get("shortDisplayName", "Away")
+        home_full = home.get("team", {}).get("displayName", home_name)
+        away_full = away.get("team", {}).get("displayName", away_name)
+
+        names_to_check = [
+            home_name.lower(), away_name.lower(),
+            home_full.lower(), away_full.lower(),
+        ]
+        if not any(team_lower in n for n in names_to_check):
+            continue
+
+        status_obj = event.get("status", {})
+        status_type = status_obj.get("type", {})
+        state = status_type.get("state", "")
+        detail = status_type.get("shortDetail", "")
+        home_score = home.get("score", "0")
+        away_score = away.get("score", "0")
+
+        ev = {
+            "away_name": away_name,
+            "home_name": home_name,
+            "away_score": away_score,
+            "home_score": home_score,
+            "state": state,
+            "detail": detail,
+        }
+
+        # Format a single-game utterance using the same style as _format_scores_utterance
+        detail_clean = _clean_detail(detail)
+
+        if state == "in":
+            try:
+                away_sc = int(away_score)
+                home_sc = int(home_score)
+            except (ValueError, TypeError):
+                away_sc = home_sc = 0
+
+            if away_sc > home_sc:
+                leader, trailer, high, low = away_name, home_name, away_sc, home_sc
+            elif home_sc > away_sc:
+                leader, trailer, high, low = home_name, away_name, home_sc, away_sc
+            else:
+                return f"The {away_name} and the {home_name} are tied at {away_sc} in the {detail_clean}."
+
+            return f"The {leader} lead the {trailer} {high} to {low} in the {detail_clean}."
+
+        elif state == "post":
+            try:
+                away_sc = int(away_score)
+                home_sc = int(home_score)
+            except (ValueError, TypeError):
+                away_sc = home_sc = 0
+
+            if away_sc == home_sc:
+                return f"The {away_name} and the {home_name} tied at {away_sc}."
+            elif away_sc > home_sc:
+                return f"The {away_name} beat the {home_name} {away_sc} to {home_sc}."
+            else:
+                return f"The {home_name} beat the {away_name} {home_sc} to {away_sc}."
+
+        else:  # "pre" or unknown — upcoming
+            return f"The {away_name} and the {home_name} tip off at {detail_clean}."
+
+    return f"I couldn't find a game for {team} in the {league} today."
+
+
+@mcp.tool()
 def get_standings(league: str) -> str:
     """Get current season standings for a league.
 
