@@ -1,0 +1,21 @@
+livekit-agents>=1.0.0
+livekit-plugins-openai>=1.0.0
+livekit
+numpy
+msgpack
+websockets
+httpx
+# IVA graph dependencies (from dynamic-skills-agent)
+anthropic
+python-dotenv
+langgraph>=0.2.0
+langgraph-checkpoint-sqlite
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-openai>=0.3.0
+pydantic>=2.0.0
+rapidfuzz
+onnxruntime
+tokenizers
+huggingface-hub

@@ -152,6 +152,7 @@ services:
       - KYUTAI_TTS_URL=ws://tts:8080
       - MCP_SERVER_URL=http://localhost:8000/sse
       - MCP_SPORTS_SERVER_URL=http://localhost:8001/sse
+      - TTS_GAIN=1.5
 
   livekit-frontend-mcp:
     build:
@@ -170,6 +171,44 @@ services:
       - ./livekit-frontend-mcp/certs:/etc/nginx/certs:ro
     depends_on:
       - livekit-frontend-mcp
+
+  # --- LiveKit Builder Demo Services ---
+
+  livekit-agent-builder:
+    build:
+      context: livekit-agent-builder/
+    volumes:
+      - D:/Applications/dynamic-skills-agent:/app/iva-source
+    environment:
+      - LIVEKIT_URL=ws://host.docker.internal:7880
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=secret
+      - LM_STUDIO_URL=http://host.docker.internal:1234/v1
+      - LM_STUDIO_MODEL=qwen/qwen3.5-9b
+      - KYUTAI_STT_URL=ws://stt:8080
+      - KYUTAI_TTS_URL=ws://tts:8080
+      - IVA_SOURCE_PATH=/app/iva-source
+      - PYTHONPATH=/app/iva-source
+      - TTS_GAIN=1.5
+
+  livekit-frontend-builder:
+    build:
+      context: livekit-frontend-builder/
+    environment:
+      - NEXT_PUBLIC_LIVEKIT_URL=wss://localhost:5443/livekit-ws/
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=secret
+
+  livekit-nginx-builder:
+    image: nginx:alpine
+    ports:
+      - "5333:80"
+      - "5443:443"
+    volumes:
+      - ./livekit-frontend-builder/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./livekit-frontend-builder/certs:/etc/nginx/certs:ro
+    depends_on:
+      - livekit-frontend-builder
 
   # llm service disabled — using LM Studio on host instead (http://host.docker.internal:1234/v1)
   # llm:
