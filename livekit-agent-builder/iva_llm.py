@@ -96,7 +96,31 @@ class IVALLMStream(llm.LLMStream):
         response = result.get("response", "")
         logger.info(f"IVA response: {response[:100]}")
 
-        # Emit the response as a single chunk (the TTS will handle it)
+        # Clean and format response for TTS with natural pauses.
+        # LiveKit accumulates all ChatChunks into one TTS request,
+        # so pauses must be embedded in the text itself.
+        import re
+        # Ensure space after sentence-ending punctuation
+        response = re.sub(r'([.!?])([A-Z])', r'\1 \2', response)
+        # Replace sentence-ending periods with commas + pause ellipsis.
+        # This creates a natural breath pause between confirmation and question.
+        # Don't replace the final sentence's punctuation.
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', response) if s.strip()]
+        if len(sentences) > 1:
+            # Join with pause: comma + ellipsis creates ~0.5s pause in Kyutai TTS
+            parts = []
+            for i, s in enumerate(sentences):
+                # Strip trailing period (TTS speaks it as "dot")
+                if s.endswith('.'):
+                    s = s[:-1]
+                parts.append(s)
+            # Join with pause markers — ",,," creates a natural breath pause
+            response = ",,,  ".join(parts)
+        else:
+            # Single sentence — just strip trailing period
+            if response.endswith('.'):
+                response = response[:-1]
+
         self._event_ch.send_nowait(
             ChatChunk(
                 id=str(uuid.uuid4()),

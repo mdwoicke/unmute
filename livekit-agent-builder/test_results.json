@@ -1,0 +1,560 @@
+{
+  "passed": 78,
+  "failed": 1,
+  "total": 79,
+  "results": [
+    {
+      "name": "number: 'one' -> '1'",
+      "passed": true,
+      "actual": "1",
+      "expected": "1",
+      "details": ""
+    },
+    {
+      "name": "number: 'nine' -> '9'",
+      "passed": true,
+      "actual": "9",
+      "expected": "9",
+      "details": ""
+    },
+    {
+      "name": "number: 'Tomorrow at nine' -> 'Tomorrow...'",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "number: 'My son and one companion'",
+      "passed": true,
+      "actual": "My son and 1 companion",
+      "expected": "My son and 1 companion",
+      "details": ""
+    },
+    {
+      "name": "number: 'Just one' -> 'Just 1'",
+      "passed": true,
+      "actual": "Just 1",
+      "expected": "Just 1",
+      "details": ""
+    },
+    {
+      "name": "companion: 'just my son' at companion stage",
+      "passed": true,
+      "actual": "1 companion son",
+      "expected": "1 companion son",
+      "details": ""
+    },
+    {
+      "name": "companion: 'my daughter' at companion stage",
+      "passed": true,
+      "actual": "1 companion daughter",
+      "expected": "1 companion daughter",
+      "details": ""
+    },
+    {
+      "name": "companion: 'none' at companion stage",
+      "passed": true,
+      "actual": "0 companions",
+      "expected": "0 companions",
+      "details": ""
+    },
+    {
+      "name": "companion: 'just me' at companion stage",
+      "passed": true,
+      "actual": "0 companions",
+      "expected": "0 companions",
+      "details": ""
+    },
+    {
+      "name": "companion: 'Just one' at companion stage",
+      "passed": true,
+      "actual": "1 companions",
+      "expected": "1 companions",
+      "details": ""
+    },
+    {
+      "name": "companion: 'a couple' at companion stage",
+      "passed": true,
+      "actual": "2 companions",
+      "expected": "2 companions",
+      "details": ""
+    },
+    {
+      "name": "companion: 'one' at NON-companion stage stays '1'",
+      "passed": true,
+      "actual": "1",
+      "expected": "1",
+      "details": ""
+    },
+    {
+      "name": "addr: 'I'm heading to Mary Hospital' -> 'Mary Hospital'",
+      "passed": true,
+      "actual": "Mary Hospital",
+      "expected": "Mary Hospital",
+      "details": ""
+    },
+    {
+      "name": "addr: 'pick me up from 123 Oak St' -> '123 Oak St'",
+      "passed": true,
+      "actual": "123 Oak St",
+      "expected": "123 Oak St",
+      "details": ""
+    },
+    {
+      "name": "addr: 'the address is 500 Pine Rd' -> '500 Pine Rd'",
+      "passed": true,
+      "actual": "500 Pine Rd",
+      "expected": "500 Pine Rd",
+      "details": ""
+    },
+    {
+      "name": "addr: 'going to City Medical Center' -> 'City Medical Center'",
+      "passed": true,
+      "actual": "City Medical Center",
+      "expected": "City Medical Center",
+      "details": ""
+    },
+    {
+      "name": "digits: '1, 4, 6, 2' -> '1462'",
+      "passed": true,
+      "actual": "1462",
+      "expected": "1462",
+      "details": ""
+    },
+    {
+      "name": "digits: 'one six three two' -> '1632'",
+      "passed": true,
+      "actual": "1632",
+      "expected": "1632",
+      "details": ""
+    },
+    {
+      "name": "digits: 'One, six, three, two' -> '1632'",
+      "passed": true,
+      "actual": "1632",
+      "expected": "1632",
+      "details": ""
+    },
+    {
+      "name": "punct: 'Hello.' -> 'Hello'",
+      "passed": true,
+      "actual": "Hello",
+      "expected": "Hello",
+      "details": ""
+    },
+    {
+      "name": "punct: 'a.m.' preserved",
+      "passed": true,
+      "actual": "a.m.",
+      "expected": "a.m.",
+      "details": ""
+    },
+    {
+      "name": "punct: 'Yes!' -> 'Yes'",
+      "passed": true,
+      "actual": "Yes",
+      "expected": "Yes",
+      "details": ""
+    },
+    {
+      "name": "punct: 'Really?' -> 'Really'",
+      "passed": true,
+      "actual": "Really",
+      "expected": "Really",
+      "details": ""
+    },
+    {
+      "name": "date: 'tomorrow' resolves",
+      "passed": true,
+      "actual": "April 5th",
+      "expected": "April 5th",
+      "details": ""
+    },
+    {
+      "name": "date: 'Tomorrow at 9' resolves",
+      "passed": true,
+      "actual": "April 5th at 9",
+      "expected": "April 5th at 9",
+      "details": ""
+    },
+    {
+      "name": "date: 'today at 2' resolves",
+      "passed": true,
+      "actual": "April 4th at 2",
+      "expected": "April 4th at 2",
+      "details": ""
+    },
+    {
+      "name": "date: 'next monday' -> April 6th",
+      "passed": true,
+      "actual": "April 6th",
+      "expected": "April 6th",
+      "details": ""
+    },
+    {
+      "name": "date: 'next tuesday' -> April 7th",
+      "passed": true,
+      "actual": "April 7th",
+      "expected": "April 7th",
+      "details": ""
+    },
+    {
+      "name": "date: 'next wednesday' -> April 8th",
+      "passed": true,
+      "actual": "April 8th",
+      "expected": "April 8th",
+      "details": ""
+    },
+    {
+      "name": "date: 'next thursday' -> April 9th",
+      "passed": true,
+      "actual": "April 9th",
+      "expected": "April 9th",
+      "details": ""
+    },
+    {
+      "name": "date: 'next friday' -> April 10th",
+      "passed": true,
+      "actual": "April 10th",
+      "expected": "April 10th",
+      "details": ""
+    },
+    {
+      "name": "date: 'next saturday' -> April 11th",
+      "passed": true,
+      "actual": "April 11th",
+      "expected": "April 11th",
+      "details": ""
+    },
+    {
+      "name": "date: 'next sunday' -> April 5th",
+      "passed": true,
+      "actual": "April 5th",
+      "expected": "April 5th",
+      "details": ""
+    },
+    {
+      "name": "time: '9 a.m.' -> '9 AM'",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "9 AM"
+    },
+    {
+      "name": "time: '2 p.m.' -> '2 PM'",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "2 PM"
+    },
+    {
+      "name": "time: '2:30 pm' -> '2:30 PM'",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "2:30 PM"
+    },
+    {
+      "name": "time: 'Tomorrow at 9 a.m.' full resolve",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "April 5th at 9 AM"
+    },
+    {
+      "name": "time: 'next monday at 2 p.m.' full resolve",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "April 6th at 2 PM"
+    },
+    {
+      "name": "time: '9 in the morning' -> '9 AM'",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "9 AM"
+    },
+    {
+      "name": "time: '3 in the afternoon' -> '3 PM'",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "3 PM"
+    },
+    {
+      "name": "addr: '123 Main Street' preserved",
+      "passed": true,
+      "actual": "123 Main Street",
+      "expected": "123 Main Street",
+      "details": ""
+    },
+    {
+      "name": "addr: '456 Oak Ave.' trailing dot stripped",
+      "passed": true,
+      "actual": "456 Oak Ave",
+      "expected": "456 Oak Ave",
+      "details": ""
+    },
+    {
+      "name": "addr: 'Five twenty one Elm Road' -> '5 20 1 Elm Road'",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "5 twenty 1 Elm Road"
+    },
+    {
+      "name": "slot: question as pickup rejected",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "details": "question word mid-sentence"
+    },
+    {
+      "name": "slot: question as dropoff rejected",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "details": "question with ?"
+    },
+    {
+      "name": "slot: '?' in value rejected",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "details": ""
+    },
+    {
+      "name": "slot: '123 Main St' valid address",
+      "passed": true,
+      "actual": "123 Main St",
+      "expected": "123 Main St",
+      "details": ""
+    },
+    {
+      "name": "slot: 'General Hospital' valid address",
+      "passed": true,
+      "actual": "General Hospital",
+      "expected": "General Hospital",
+      "details": ""
+    },
+    {
+      "name": "slot: '5521 Elm Road' valid address",
+      "passed": true,
+      "actual": "5521 Elm Road",
+      "expected": "5521 Elm Road",
+      "details": ""
+    },
+    {
+      "name": "slot: 'home' short non-address rejected",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "details": "too short, no number, no address word"
+    },
+    {
+      "name": "slot: 'my house' short non-address rejected",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "details": ""
+    },
+    {
+      "name": "slot: member_id '1632' valid",
+      "passed": true,
+      "actual": "1632",
+      "expected": "1632",
+      "details": ""
+    },
+    {
+      "name": "slot: member_id 'one six three two' invalid (no digits)",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "details": ""
+    },
+    {
+      "name": "slot: 'General Medical Center on Fifth Avenue' valid",
+      "passed": true,
+      "actual": "General Medical Center on Fifth Avenue",
+      "expected": "General Medical Center on Fifth Avenue",
+      "details": ""
+    },
+    {
+      "name": "q: 'Where can I be picked up from?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: 'Or can I be picked up from?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: 'What is a member ID?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: 'How do I find my member ID?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: 'Can you pick me up from home?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: 'Where should I be waiting?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: 'Do I need to bring anything?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: 'Is there a cost for this?' = question",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": ""
+    },
+    {
+      "name": "q: '123 Main Street' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: '1632' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'General Hospital' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'Tomorrow at 9 AM' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'Yes' = NOT question (too short)",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'No wheelchair needed' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'Just my son' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'Yes, schedule, right?' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'Book a ride, okay?' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'Yes, Anita, schedule, right?' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "q: 'I need a ride, correct?' = NOT question",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "details": ""
+    },
+    {
+      "name": "iva: intent detected as book_new_ride",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "stage=verification, intent=book_new_ride"
+    },
+    {
+      "name": "iva: member_id extracted from number words",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "slots={'member_id': '1632'}"
+    },
+    {
+      "name": "iva: pickup_address extracted",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "slots={'member_id': '1632', 'pickup_address': '123 Main Street'}"
+    },
+    {
+      "name": "iva: question not stored as dropoff_address",
+      "passed": false,
+      "actual": false,
+      "expected": true,
+      "details": "dropoff=be dropped off"
+    },
+    {
+      "name": "iva: dropoff accepted or stage advanced",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "stage=collect_time, slots={'member_id': '1632', 'pickup_address': '123 Main Street', 'dropoff_address': 'be dropped off'}"
+    },
+    {
+      "name": "iva: relative date 'Tomorrow at 9 AM' parsed",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "details": "slots={'member_id': '1632', 'pickup_address': '123 Main Street', 'dropoff_address': 'be dropped off', 'appointment_date': 'April 5th', 'appointment_time': '9 AM'}"
+    }
+  ]
+}

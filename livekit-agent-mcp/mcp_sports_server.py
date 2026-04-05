@@ -5,10 +5,15 @@ The LiveKit agent discovers and calls these tools via MCP protocol.
 Data sourced from ESPN public API (no API key required).
 """
 
-import re
 import httpx
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from mcp.server.fastmcp import FastMCP
+
+try:
+    from zoneinfo import ZoneInfo
+    _eastern = ZoneInfo("America/New_York")
+except Exception:
+    _eastern = None
 
 mcp = FastMCP("Sports MCP Server", port=8001)
 
@@ -20,6 +25,9 @@ LEAGUES = {
 }
 
 ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports"
+
+# Module-level HTTP client — reuses TCP connections across tool calls
+_http = httpx.Client(timeout=10, base_url=ESPN_BASE)
 
 # Sport-specific phrasing for upcoming ("pre") games
 _UPCOMING_PHRASE = {
@@ -66,64 +74,115 @@ def _clean_detail(detail: str) -> str:
     return result
 
 
-def _relative_date(detail: str) -> str:
-    """Convert an ESPN shortDetail date string to relative spoken phrasing.
+def _to_eastern(dt_utc: datetime) -> datetime:
+    """Convert a UTC datetime to US Eastern time."""
+    if _eastern is not None:
+        return dt_utc.astimezone(_eastern)
 
-    Handles formats like "3/30 - 7:30 PM ET" or "Sat 3/30 at 7:30 PM ET".
-    Returns phrases like "today at 7 30 PM Eastern" or "this Saturday at 7 30 PM Eastern".
-    Falls back to _clean_detail(detail) if parsing fails.
-    """
-    def _et_to_eastern(s: str) -> str:
-        return re.sub(r"\bET\b", "Eastern", s)
+    year = dt_utc.year
 
-    def _clean_time(t: str) -> str:
-        # "7:30 PM Eastern" -> "7 30 PM Eastern"
-        return t.replace(":", " ")
+    def nth_sunday(y: int, month: int, n: int) -> datetime:
+        first = datetime(y, month, 1, tzinfo=timezone.utc)
+        days_until_sunday = (6 - first.weekday()) % 7
+        first_sunday = first + timedelta(days=days_until_sunday)
+        return first_sunday + timedelta(weeks=n - 1)
 
-    # Match patterns like:
-    #   "3/30 - 7:30 PM ET"
-    #   "Sat 3/30 at 7:30 PM ET"
-    #   "3/30 at 7:30 PM ET"
-    pattern = re.compile(
-        r"(?:\w+\s+)?(\d{1,2})/(\d{1,2})"   # optional weekday, then M/D
-        r"(?:\s*[-\u2013at]+\s*)"             # separator: dash, en-dash, or "at"
-        r"(\d{1,2}:\d{2}\s*[AP]M\s*ET)",     # time like "7:30 PM ET"
-        re.IGNORECASE,
-    )
-    m = pattern.search(detail)
-    if not m:
-        return _clean_detail(detail)
-
-    month = int(m.group(1))
-    day = int(m.group(2))
-    time_str = m.group(3).strip()
-
-    now = datetime.now()
-    try:
-        game_dt = datetime(now.year, month, day)
-    except ValueError:
-        return _clean_detail(detail)
-
-    # Advance year if the date has already passed this calendar year
-    if game_dt.date() < now.date():
-        try:
-            game_dt = datetime(now.year + 1, month, day)
-        except ValueError:
-            return _clean_detail(detail)
-
-    delta_days = (game_dt.date() - now.date()).days
-    spoken_time = _clean_time(_et_to_eastern(time_str))
-
-    if delta_days == 0:
-        return f"today at {spoken_time}"
-    elif delta_days == 1:
-        return f"tomorrow at {spoken_time}"
-    elif 2 <= delta_days <= 6:
-        weekday = game_dt.strftime("%A")  # e.g. "Saturday"
-        return f"this {weekday} at {spoken_time}"
+    edt_start = nth_sunday(year, 3, 2)
+    edt_end = nth_sunday(year, 11, 1)
+    if edt_start <= dt_utc.replace(tzinfo=timezone.utc) < edt_end:
+        offset = timezone(timedelta(hours=-4))
     else:
-        # Beyond 6 days — fall back to cleaned raw detail
-        return _clean_detail(detail)
+        offset = timezone(timedelta(hours=-5))
+    return dt_utc.astimezone(offset)
+
+
+def _spoken_time(dt: datetime) -> str:
+    """Format a datetime as spoken time, e.g. '7 30 PM Eastern' or '1 PM Eastern'."""
+    hour = dt.hour
+    minute = dt.minute
+    period = "AM" if hour < 12 else "PM"
+    hour12 = hour % 12 or 12
+    if minute == 0:
+        return f"{hour12} {period} Eastern"
+    return f"{hour12} {minute:02d} {period} Eastern"
+
+
+def _spoken_date(dt: datetime) -> str:
+    """Format a datetime as a spoken date, e.g. 'April 5th'."""
+    month = dt.strftime("%B")
+    day = dt.day
+    if 11 <= day <= 13:
+        suffix = "th"
+    elif day % 10 == 1:
+        suffix = "st"
+    elif day % 10 == 2:
+        suffix = "nd"
+    elif day % 10 == 3:
+        suffix = "rd"
+    else:
+        suffix = "th"
+    return f"{month} {day}{suffix}"
+
+
+def _relative_date_from_iso(date_str: str) -> str:
+    """Convert an ESPN ISO 8601 event date to relative spoken phrasing.
+
+    Parses strings like "2026-03-30T23:30Z" and converts to Eastern time.
+    Returns phrases like "today at 7 30 PM Eastern", "tomorrow at 3 PM Eastern",
+    "this Saturday at 1 PM Eastern", or "April 12th at 7 PM Eastern".
+    Falls back to _clean_detail on the raw string if parsing fails.
+    """
+    if not date_str:
+        return ""
+    try:
+        game_dt_utc = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+        game_dt = _to_eastern(game_dt_utc)
+        now_eastern = _to_eastern(datetime.now(timezone.utc))
+
+        delta_days = (game_dt.date() - now_eastern.date()).days
+        time_str = _spoken_time(game_dt)
+
+        if delta_days == 0:
+            return f"today at {time_str}"
+        elif delta_days == 1:
+            return f"tomorrow at {time_str}"
+        elif 2 <= delta_days <= 6:
+            weekday = game_dt.strftime("%A")
+            return f"this {weekday} at {time_str}"
+        else:
+            return f"{_spoken_date(game_dt)} at {time_str}"
+    except Exception:
+        return _clean_detail(date_str)
+
+
+def _parse_events(events: list[dict]) -> list[dict]:
+    """Parse ESPN events into a standardized list of event dicts."""
+    result = []
+    for event in events:
+        competitions = event.get("competitions", [])
+        if not competitions:
+            continue
+        competitors = competitions[0].get("competitors", [])
+        if len(competitors) != 2:
+            continue
+
+        home = competitors[0]
+        away = competitors[1]
+        status_obj = event.get("status", {})
+        status_type = status_obj.get("type", {})
+
+        result.append({
+            "away_name": away.get("team", {}).get("shortDisplayName", "Away"),
+            "home_name": home.get("team", {}).get("shortDisplayName", "Home"),
+            "away_full": away.get("team", {}).get("displayName", ""),
+            "home_full": home.get("team", {}).get("displayName", ""),
+            "away_score": away.get("score", "0"),
+            "home_score": home.get("score", "0"),
+            "state": status_type.get("state", ""),
+            "detail": status_type.get("shortDetail", ""),
+            "date": event.get("date", ""),
+        })
+    return result
 
 
 def _upcoming_phrase(league: str) -> str:
@@ -203,7 +262,8 @@ def _format_scores_utterance(events_data: list[dict], league: str) -> str:
                 )
 
         else:  # "pre" or unknown — upcoming
-            sentences.append(f"The {away} and the {home} {phrase} {detail}.")
+            spoken_date = _relative_date_from_iso(ev.get("date", "")) or detail
+            sentences.append(f"The {away} and the {home} {phrase} {spoken_date}.")
 
     if truncated > 0:
         sentences.append(f"There are also {truncated} other games scheduled.")
@@ -298,7 +358,7 @@ def _format_schedule_utterance(events_data: list[dict], team: str, league: str) 
 
     Args:
         events_data: List of dicts with keys: away_name, home_name,
-                     away_score, home_score, state, detail
+                     away_score, home_score, state, detail, date
         team: The team filter string (empty string means all teams).
         league: Lowercase league key (nba, nfl, mlb, nhl) used for
                 sport-specific phrasing of upcoming games.
@@ -318,7 +378,7 @@ def _format_schedule_utterance(events_data: list[dict], team: str, league: str) 
         state = ev["state"]
 
         if state == "pre":
-            detail = _relative_date(ev["detail"])
+            detail = _relative_date_from_iso(ev["date"]) if ev.get("date") else _clean_detail(ev["detail"])
             team_lower = team.strip().lower()
             if team_lower and team_lower in home.lower():
                 sentences.append(f"The {home} host the {away}, {phrase} {detail}.")
@@ -350,50 +410,18 @@ def get_scores(league: str) -> str:
     if error:
         return error
 
-    url = f"{ESPN_BASE}/{sport_path}/scoreboard"
-
-    with httpx.Client(timeout=10) as client:
-        try:
-            resp = client.get(url)
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as e:
-            return f"Failed to fetch {league.upper()} scores: {e}"
+    try:
+        resp = _http.get(f"/{sport_path}/scoreboard")
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        return f"Failed to fetch {league.upper()} scores: {e}"
 
     events = data.get("events", [])
     if not events:
         return f"No {league.upper()} games found today."
 
-    events_data = []
-    for event in events:
-        status_obj = event.get("status", {})
-        status_type = status_obj.get("type", {})
-        state = status_type.get("state", "")
-        detail = status_type.get("shortDetail", "")
-
-        competitions = event.get("competitions", [])
-        if not competitions:
-            continue
-
-        competitors = competitions[0].get("competitors", [])
-        if len(competitors) != 2:
-            continue
-
-        home = competitors[0]
-        away = competitors[1]
-        home_name = home.get("team", {}).get("shortDisplayName", "Home")
-        away_name = away.get("team", {}).get("shortDisplayName", "Away")
-        home_score = home.get("score", "0")
-        away_score = away.get("score", "0")
-
-        events_data.append({
-            "away_name": away_name,
-            "home_name": home_name,
-            "away_score": away_score,
-            "home_score": home_score,
-            "state": state,
-            "detail": detail,
-        })
+    events_data = _parse_events(events)
 
     if not events_data:
         return f"No {league.upper()} games found today."
@@ -416,57 +444,36 @@ def get_team_score(team: str, league: str) -> str:
     if error:
         return error
 
-    url = f"{ESPN_BASE}/{sport_path}/scoreboard"
-
-    with httpx.Client(timeout=10) as client:
-        try:
-            resp = client.get(url)
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as e:
-            return f"Failed to fetch {league.upper()} scores: {e}"
+    try:
+        resp = _http.get(f"/{sport_path}/scoreboard")
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        return f"Failed to fetch {league.upper()} scores: {e}"
 
     events = data.get("events", [])
     team_lower = team.strip().lower()
     league_key = league.strip().lower()
 
-    for event in events:
-        competitions = event.get("competitions", [])
-        if not competitions:
-            continue
-
-        competitors = competitions[0].get("competitors", [])
-        if len(competitors) != 2:
-            continue
-
-        home = competitors[0]
-        away = competitors[1]
-        home_name = home.get("team", {}).get("shortDisplayName", "Home")
-        away_name = away.get("team", {}).get("shortDisplayName", "Away")
-        home_full = home.get("team", {}).get("displayName", home_name)
-        away_full = away.get("team", {}).get("displayName", away_name)
-
+    for ev in _parse_events(events):
         names_to_check = [
-            home_name.lower(), away_name.lower(),
-            home_full.lower(), away_full.lower(),
+            ev["away_name"].lower(),
+            ev["home_name"].lower(),
+            ev["away_full"].lower(),
+            ev["home_full"].lower(),
         ]
         if not any(team_lower in n for n in names_to_check):
             continue
 
-        status_obj = event.get("status", {})
-        status_type = status_obj.get("type", {})
-        state = status_type.get("state", "")
-        detail = status_type.get("shortDetail", "")
-        home_score = home.get("score", "0")
-        away_score = away.get("score", "0")
-
-        # Format a single-game utterance using the same style as _format_scores_utterance
-        detail_clean = _clean_detail(detail)
+        away_name = ev["away_name"]
+        home_name = ev["home_name"]
+        state = ev["state"]
+        detail_clean = _clean_detail(ev["detail"])
 
         if state == "in":
             try:
-                away_sc = int(away_score)
-                home_sc = int(home_score)
+                away_sc = int(ev["away_score"])
+                home_sc = int(ev["home_score"])
             except (ValueError, TypeError):
                 away_sc = home_sc = 0
 
@@ -481,8 +488,8 @@ def get_team_score(team: str, league: str) -> str:
 
         elif state == "post":
             try:
-                away_sc = int(away_score)
-                home_sc = int(home_score)
+                away_sc = int(ev["away_score"])
+                home_sc = int(ev["home_score"])
             except (ValueError, TypeError):
                 away_sc = home_sc = 0
 
@@ -495,8 +502,8 @@ def get_team_score(team: str, league: str) -> str:
 
         else:  # "pre" or unknown — upcoming
             phrase = _upcoming_phrase(league_key)
-            upcoming_detail = _clean_detail(detail)
-            return f"The {away_name} and the {home_name} {phrase} {upcoming_detail}."
+            spoken_date = _relative_date_from_iso(ev.get("date", "")) or _clean_detail(ev["detail"])
+            return f"The {away_name} and the {home_name} {phrase} {spoken_date}."
 
     return f"I couldn't find a game for {team} in the {league} today."
 
@@ -515,15 +522,12 @@ def get_standings(league: str) -> str:
     if error:
         return error
 
-    url = f"{ESPN_BASE}/{sport_path}/standings"
-
-    with httpx.Client(timeout=10) as client:
-        try:
-            resp = client.get(url)
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as e:
-            return f"Failed to fetch {league.upper()} standings: {e}"
+    try:
+        resp = _http.get(f"/{sport_path}/standings")
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        return f"Failed to fetch {league.upper()} standings: {e}"
 
     children = data.get("children", [])
     if not children:
@@ -555,62 +559,37 @@ def get_schedule(league: str, team: str = "") -> str:
         dates.append(day.strftime("%Y%m%d"))
 
     date_range = f"{dates[0]}-{dates[-1]}"
-    url = f"{ESPN_BASE}/{sport_path}/scoreboard?dates={date_range}"
 
-    with httpx.Client(timeout=10) as client:
-        try:
-            resp = client.get(url)
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as e:
-            return f"Failed to fetch {league.upper()} schedule: {e}"
+    try:
+        resp = _http.get(f"/{sport_path}/scoreboard", params={"dates": date_range})
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        return f"Failed to fetch {league.upper()} schedule: {e}"
 
     events = data.get("events", [])
     if not events:
         return f"No upcoming {league.upper()} games found in the next 7 days."
 
     team_lower = team.strip().lower()
-    events_data = []
+    all_events = _parse_events(events)
 
-    for event in events:
-        competitions = event.get("competitions", [])
-        if not competitions:
-            continue
-
-        competitors = competitions[0].get("competitors", [])
-        if len(competitors) != 2:
-            continue
-
-        home = competitors[0]
-        away = competitors[1]
-        home_name = home.get("team", {}).get("shortDisplayName", "Home")
-        away_name = away.get("team", {}).get("shortDisplayName", "Away")
-        home_full = home.get("team", {}).get("displayName", home_name)
-        away_full = away.get("team", {}).get("displayName", away_name)
-
-        # Filter by team if specified
-        if team_lower:
-            names_to_check = [
-                home_name.lower(), away_name.lower(),
-                home_full.lower(), away_full.lower(),
-            ]
-            if not any(team_lower in n for n in names_to_check):
-                continue
-
-        status_obj = event.get("status", {})
-        detail = status_obj.get("type", {}).get("shortDetail", "TBD")
-        state = status_obj.get("type", {}).get("state", "")
-        home_score = home.get("score", "0")
-        away_score = away.get("score", "0")
-
-        events_data.append({
-            "away_name": away_name,
-            "home_name": home_name,
-            "away_score": away_score,
-            "home_score": home_score,
-            "state": state,
-            "detail": detail,
-        })
+    # Filter by team if specified
+    if team_lower:
+        events_data = [
+            ev for ev in all_events
+            if any(
+                team_lower in n
+                for n in [
+                    ev["away_name"].lower(),
+                    ev["home_name"].lower(),
+                    ev["away_full"].lower(),
+                    ev["home_full"].lower(),
+                ]
+            )
+        ]
+    else:
+        events_data = all_events
 
     if not events_data:
         if team_lower:

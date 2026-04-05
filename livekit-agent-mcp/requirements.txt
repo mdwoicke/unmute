@@ -1,0 +1,8 @@
+livekit-agents[mcp]>=1.0.0
+livekit-plugins-openai>=1.0.0
+livekit
+numpy
+msgpack
+websockets
+httpx
+mcp>=1.24.0,<2

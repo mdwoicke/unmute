@@ -34,5 +34,31 @@ export async function GET(request: NextRequest) {
 
   const jwt = await token.toJwt();
 
-  return NextResponse.json({ token: jwt });
+  // Generate Cloudflare TURN credentials for external connectivity
+  let iceServers = null;
+  const turnTokenId = process.env.CF_TURN_TOKEN_ID;
+  const turnApiToken = process.env.CF_TURN_API_TOKEN;
+  if (turnTokenId && turnApiToken) {
+    try {
+      const turnResp = await fetch(
+        `https://rtc.live.cloudflare.com/v1/turn/keys/${turnTokenId}/credentials/generate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${turnApiToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ttl: 86400 }),
+        }
+      );
+      if (turnResp.ok) {
+        const turnData = await turnResp.json();
+        iceServers = turnData.iceServers;
+      }
+    } catch (e) {
+      console.error("Failed to get TURN credentials:", e);
+    }
+  }
+
+  return NextResponse.json({ token: jwt, iceServers });
 }

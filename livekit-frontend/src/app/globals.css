@@ -1,0 +1,272 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0a0a0a;
+  color: #ededed;
+  min-height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 400px;
+}
+
+.connect-btn {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.connect-btn:hover {
+  background: #1d4ed8;
+}
+
+.connect-btn:disabled {
+  background: #333;
+  cursor: not-allowed;
+}
+
+.room-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.status-dot.disconnected {
+  background: #ef4444;
+}
+
+.status-dot.connecting {
+  background: #eab308;
+}
+
+.transcript-box {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.transcript-entry {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.transcript-entry .role {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.transcript-entry .role.user {
+  color: #60a5fa;
+}
+
+.transcript-entry .role.agent {
+  color: #34d399;
+}
+
+.weather-badge {
+  display: inline-block;
+  background: #1e3a5f;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  color: #93c5fd;
+}
+
+.voice-selector {
+  width: 100%;
+  max-width: 600px;
+}
+
+.voice-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.75rem;
+}
+
+.voice-selected-badge {
+  background: #1e3a5f;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  color: #93c5fd;
+}
+
+.category-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.category-tab {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #111;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.category-tab:hover {
+  border-color: #555;
+  color: #ccc;
+}
+
+.category-tab.active {
+  border-color: #2563eb;
+  background: #0f1a2e;
+  color: #60a5fa;
+}
+
+.category-count {
+  font-size: 0.65rem;
+  background: #222;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  color: #666;
+}
+
+.category-tab.active .category-count {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+
+.voice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.voice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #111;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.voice-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.voice-lang {
+  font-size: 0.6rem;
+  color: #555;
+  background: #1a1a1a;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+.voice-card:hover {
+  border-color: #555;
+  background: #1a1a1a;
+}
+
+.voice-card.selected {
+  border-color: #2563eb;
+  background: #0f1a2e;
+}
+
+.voice-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #ededed;
+}
+
+.voice-desc {
+  font-size: 0.7rem;
+  color: #666;
+  margin-top: 0.1rem;
+}
+
+.voice-card.selected .voice-name {
+  color: #60a5fa;
+}
+
+.disconnect-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: 1px solid #333;
+  border-radius: 12px;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.disconnect-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}

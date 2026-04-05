@@ -1,0 +1,1828 @@
+- name: Watercooler
+  good: true
+  category: Featured
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: unmute-prod-website/p329_022.wav
+    description: From the Device Recorded VCTK dataset.
+    description_link: https://datashare.ed.ac.uk/handle/10283/3038
+- name: Quiz show
+  comment: man, UK, skeptical
+  good: true
+  category: Featured
+  instructions:
+    type: quiz_show
+  source:
+    source_type: freesound
+    url: https://freesound.org/people/InspectorJ/sounds/519189/
+    sound_instance:
+      id: 519189
+      name: "Request #42 - Hmm, I don't know.wav"
+      username: InspectorJ
+      license: https://creativecommons.org/licenses/by/4.0/
+    path_on_server: unmute-prod-website/freesound/519189_request-42---hmm-i-dont-knowwav.mp3
+- name: Gertrude
+  good: true
+  category: Featured
+  instructions:
+    type: constant
+    text: Offer life advice. Be kind and sympathetic. Your name is Gertrude.
+  source:
+    source_type: freesound
+    url: https://freesound.org/people/tender_buttons/sounds/440565/
+    sound_instance:
+      id: 440565
+      name: Why is there education.wav
+      username: tender_buttons
+      license: http://creativecommons.org/licenses/by/3.0/
+    path_on_server: unmute-prod-website/freesound/440565_why-is-there-educationwav.mp3
+- name: Dev (news)
+  good: true
+  category: Featured
+  instructions:
+    type: news
+  source:
+    source_type: file
+    path_on_server: unmute-prod-website/developer-1.mp3
+    description: This is the voice of Václav Volhejn from Kyutai.
+- name: Explanation
+  good: true
+  category: Featured
+  instructions:
+    type: unmute_explanation
+  source:
+    source_type: file
+    path_on_server: unmute-prod-website/ex04_narration_longform_00001.wav
+    description: This voice comes from the Expresso dataset.
+    description_link: https://speechbot.github.io/expresso/
+- name: Charles
+  good: true
+  category: Featured
+  instructions:
+    type: constant
+    text: Tu es le général de Gaulle. Pour ton premier tour de parole, tu te présentes en français en 2 phrases. Si on te répond en français, tu parles en français. Si on te répond en anglais, tu parles en anglais, mais tu utilises au moins un mot français par phrase, entre guillemets français. Quand on te pose une question, tu réponds en parlant d'une anecdote historique que tu as vécu, comme une rencontre ou une discussion. Tu fais preuve d'une sensibilité particulière à la souffrance de tous les peuples du monde au cours de l'histoire. Tu utilises un langage grave et solennel.
+  source:
+    source_type: file
+    path_on_server: unmute-prod-website/degaulle-2.wav
+    description: From a recording of Charles de Gaulle's speech.
+    description_link: https://www.youtube.com/watch?v=AUS5LHDkwP0
+- name: "Développeuse"
+  good: true
+  category: Featured
+  instructions:
+    type: smalltalk
+    language: fr
+  source:
+    source_type: file
+    path_on_server: unmute-prod-website/developpeuse-3.wav
+    description: This is the voice of one of the developers at Kyutai.
+- name: Fabieng
+  good: true
+  category: Featured
+  instructions:
+    type: constant
+    text: Ta langue principale est le français mais avec des anglicismes caractéristiques du jeune cadre dynamique. Tu es coach en motivation et Chief Happiness Officer dans une start-up qui fait du b2b. Tu cherches à tout optimiser dans la vie et à avoir un mindset de vainqueur.
+    language: fr
+  source:
+    source_type: file
+    path_on_server: unmute-prod-website/fabieng-enhanced-v2.wav
+    description: Fabieng is voice acted by Neil Zeghidour from Kyutai.
+- name: Alba (Announcer)
+  good: true
+  category: Character Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: alba-mackenna/announcer.wav
+    description: Announcer style voice by Alba MacKenna (CC BY 4.0).
+- name: Alba (Casual)
+  good: true
+  category: Character Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: alba-mackenna/casual.wav
+    description: Casual conversational voice by Alba MacKenna (CC BY 4.0).
+- name: Alba (Merchant)
+  good: true
+  category: Character Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: alba-mackenna/merchant.wav
+    description: Merchant character voice by Alba MacKenna (CC BY 4.0).
+- name: Alba (A Moment By)
+  good: true
+  category: Character Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: alba-mackenna/a-moment-by.wav
+    description: Kinder World series style voice by Alba MacKenna (CC BY 4.0).
+- name: AHmad
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/AHmad.wav
+    description: Community voice donation (CC0).
+- name: ASEN
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/ASEN.wav
+    description: Community voice donation (CC0).
+- name: Aadi
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Aadi.wav
+    description: Community voice donation (CC0).
+- name: AbD
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/AbD.wav
+    description: Community voice donation (CC0).
+- name: Abhinox
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Abhinox.wav
+    description: Community voice donation (CC0).
+- name: Abo Ayman
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Abo_Ayman.wav
+    description: Community voice donation (CC0).
+- name: Abob Malay
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Abob_Malay.wav
+    description: Community voice donation (CC0).
+- name: Adarsh Bulla
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Adarsh_Bulla.wav
+    description: Community voice donation (CC0).
+- name: AgentCobra
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/AgentCobra.wav
+    description: Community voice donation (CC0).
+- name: Ajith
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Ajith.wav
+    description: Community voice donation (CC0).
+- name: Alejandro espanol latino
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Alejandro_espanol_latino.wav
+    description: Community voice donation (CC0).
+- name: Allen
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Allen.wav
+    description: Community voice donation (CC0).
+- name: AmitNag
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/AmitNag.wav
+    description: Community voice donation (CC0).
+- name: Andrea
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Andrea.wav
+    description: Community voice donation (CC0).
+- name: Andrea (Spanish)
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Andrea_(Spanish).wav
+    description: Community voice donation (CC0).
+- name: Antoine Vala
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Antoine_Vala.wav
+    description: Community voice donation (CC0).
+- name: Antoni
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Antoni.wav
+    description: Community voice donation (CC0).
+- name: Aon
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Aon.wav
+    description: Community voice donation (CC0).
+- name: Arjun Z
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Arjun_Z.wav
+    description: Community voice donation (CC0).
+- name: Aryobe
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Aryobe.wav
+    description: Community voice donation (CC0).
+- name: BLUE
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/BLUE.wav
+    description: Community voice donation (CC0).
+- name: Bijay
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Bijay.wav
+    description: Community voice donation (CC0).
+- name: Blake
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Blake.wav
+    description: Community voice donation (CC0).
+- name: Bobby McFern
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Bobby_McFern.wav
+    description: Community voice donation (CC0).
+- name: Breaking 1
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Breaking_1.wav
+    description: Community voice donation (CC0).
+- name: BrokenHypocrite
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/BrokenHypocrite.wav
+    description: Community voice donation (CC0).
+- name: Butter
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Butter.wav
+    description: Community voice donation (CC0).
+- name: CPS 001
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/CPS_001.wav
+    description: Community voice donation (CC0).
+- name: Chujus
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Chujus.wav
+    description: Community voice donation (CC0).
+- name: Cicada
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Cicada.wav
+    description: Community voice donation (CC0).
+- name: ClassicWizard
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/ClassicWizard.wav
+    description: Community voice donation (CC0).
+- name: Curlinvictus
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Curlinvictus.wav
+    description: Community voice donation (CC0).
+- name: Darius
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Darius.wav
+    description: Community voice donation (CC0).
+- name: Darya khan
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Darya_khan.wav
+    description: Community voice donation (CC0).
+- name: Deepak
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Deepak.wav
+    description: Community voice donation (CC0).
+- name: Dhruv Rao
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Dhruv_Rao.wav
+    description: Community voice donation (CC0).
+- name: Dil
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Dil.wav
+    description: Community voice donation (CC0).
+- name: Enrique
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Enrique.wav
+    description: Community voice donation (CC0).
+- name: Enrique (Spanish)
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Enrique_(Spanish).wav
+    description: Community voice donation (CC0).
+- name: Erick
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Erick.wav
+    description: Community voice donation (CC0).
+- name: Ernesto Y
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Ernesto_Y.wav
+    description: Community voice donation (CC0).
+- name: Eshan
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Eshan.wav
+    description: Community voice donation (CC0).
+- name: Esteban Aguirre Arias
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Esteban_Aguirre_Arias.wav
+    description: Community voice donation (CC0).
+- name: Ferdinand
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Ferdinand.wav
+    description: Community voice donation (CC0).
+- name: FlorDaddy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/FlorDaddy.wav
+    description: Community voice donation (CC0).
+- name: Fred Mara
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Fred_Mara.wav
+    description: Community voice donation (CC0).
+- name: Giovanne
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Giovanne.wav
+    description: Community voice donation (CC0).
+- name: Glenn
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Glenn.wav
+    description: Community voice donation (CC0).
+- name: Goku
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Goku.wav
+    description: Community voice donation (CC0).
+- name: Gonzalo-1
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Gonzalo-1.wav
+    description: Community voice donation (CC0).
+- name: Gonzalo
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Gonzalo.wav
+    description: Community voice donation (CC0).
+- name: Greggy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Greggy.wav
+    description: Community voice donation (CC0).
+- name: Haku
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Haku.wav
+    description: Community voice donation (CC0).
+- name: Hannah
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Hannah.wav
+    description: Community voice donation (CC0).
+- name: Hardik Clone
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Hardik_Clone.wav
+    description: Community voice donation (CC0).
+- name: Hillbilly Jim
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Hillbilly_Jim.wav
+    description: Community voice donation (CC0).
+- name: Hkl
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Hkl.wav
+    description: Community voice donation (CC0).
+- name: Hugo the frenchie
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Hugo_the_frenchie.wav
+    description: Community voice donation (CC0).
+- name: Ilyass yea
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Ilyass_yea.wav
+    description: Community voice donation (CC0).
+- name: Imran 475
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Imran_475.wav
+    description: Community voice donation (CC0).
+- name: Imran from I India
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Imran_from_I_India.wav
+    description: Community voice donation (CC0).
+- name: Indian guy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Indian_guy.wav
+    description: Community voice donation (CC0).
+- name: Ineedthisnow
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Ineedthisnow.wav
+    description: Community voice donation (CC0).
+- name: JJis2123
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/JJis2123.wav
+    description: Community voice donation (CC0).
+- name: JOSHE
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/JOSHE.wav
+    description: Community voice donation (CC0).
+- name: James
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/James.wav
+    description: Community voice donation (CC0).
+- name: Jaspino
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Jaspino.wav
+    description: Community voice donation (CC0).
+- name: Jaw
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Jaw.wav
+    description: Community voice donation (CC0).
+- name: Jay
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Jay.wav
+    description: Community voice donation (CC0).
+- name: Jeff Andrew
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Jeff_Andrew.wav
+    description: Community voice donation (CC0).
+- name: Jeffrey
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Jeffrey.wav
+    description: Community voice donation (CC0).
+- name: Jeremy Q
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Jeremy_Q.wav
+    description: Community voice donation (CC0).
+- name: Jimmy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Jimmy.wav
+    description: Community voice donation (CC0).
+- name: Joaopedrobil1
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Joaopedrobil1.wav
+    description: Community voice donation (CC0).
+- name: John Triguero
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/John_Triguero.wav
+    description: Community voice donation (CC0).
+- name: Juanrestrepo177777
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Juanrestrepo177777.wav
+    description: Community voice donation (CC0).
+- name: Karti
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Karti.wav
+    description: Community voice donation (CC0).
+- name: Kditz
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Kditz.wav
+    description: Community voice donation (CC0).
+- name: Koorosh
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Koorosh.wav
+    description: Community voice donation (CC0).
+- name: LC
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/LC.wav
+    description: Community voice donation (CC0).
+- name: L Roy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/L_Roy.wav
+    description: Community voice donation (CC0).
+- name: Lake
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Lake.wav
+    description: Community voice donation (CC0).
+- name: Lammy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Lammy.wav
+    description: Community voice donation (CC0).
+- name: Lara
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Lara.wav
+    description: Community voice donation (CC0).
+- name: Latin Accent
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Latin_Accent.wav
+    description: Community voice donation (CC0).
+- name: Liquescent
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Liquescent.wav
+    description: Community voice donation (CC0).
+- name: Louis
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Louis.wav
+    description: Community voice donation (CC0).
+- name: Lucas
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Lucas.wav
+    description: Community voice donation (CC0).
+- name: MJDePedro
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/MJDePedro.wav
+    description: Community voice donation (CC0).
+- name: Maisako
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Maisako.wav
+    description: Community voice donation (CC0).
+- name: Manahen
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Manahen.wav
+    description: Community voice donation (CC0).
+- name: Marshal Indian
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Marshal_Indian.wav
+    description: Community voice donation (CC0).
+- name: Midlands Bedfordshire Dialect
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Midlands_Bedfordshire_Dialect.wav
+    description: Community voice donation (CC0).
+- name: Moses
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Moses.wav
+    description: Community voice donation (CC0).
+- name: MrHat
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/MrHat.wav
+    description: Community voice donation (CC0).
+- name: Mr captain
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Mr_captain.wav
+    description: Community voice donation (CC0).
+- name: Muhtasim's Voice
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Muhtasim's_Voice.wav
+    description: Community voice donation (CC0).
+- name: Mystery Sir
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Mystery_Sir.wav
+    description: Community voice donation (CC0).
+- name: Narrum
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Narrum.wav
+    description: Community voice donation (CC0).
+- name: Nick
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Nick.wav
+    description: Community voice donation (CC0).
+- name: P0LFR
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/P0LFR.wav
+    description: Community voice donation (CC0).
+- name: Pai ve
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Pai_ve.wav
+    description: Community voice donation (CC0).
+- name: Parthiban
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Parthiban.wav
+    description: Community voice donation (CC0).
+- name: Prakash369
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Prakash369.wav
+    description: Community voice donation (CC0).
+- name: Puzzle
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Puzzle.wav
+    description: Community voice donation (CC0).
+- name: Qasim Wali Khan
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Qasim_Wali_Khan.wav
+    description: Community voice donation (CC0).
+- name: RAJ
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/RAJ.wav
+    description: Community voice donation (CC0).
+- name: Rafaelpazv
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Rafaelpazv.wav
+    description: Community voice donation (CC0).
+- name: Rahul
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Rahul.wav
+    description: Community voice donation (CC0).
+- name: Raj25
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Raj25.wav
+    description: Community voice donation (CC0).
+- name: Ramu
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Ramu.wav
+    description: Community voice donation (CC0).
+- name: Ranjith
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Ranjith.wav
+    description: Community voice donation (CC0).
+- name: Richard cuban
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Richard_cuban.wav
+    description: Community voice donation (CC0).
+- name: Rony
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Rony.wav
+    description: Community voice donation (CC0).
+- name: Roscoe
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Roscoe.wav
+    description: Community voice donation (CC0).
+- name: Rs
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Rs.wav
+    description: Community voice donation (CC0).
+- name: Rup
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Rup.wav
+    description: Community voice donation (CC0).
+- name: SSA150803
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/SSA150803.wav
+    description: Community voice donation (CC0).
+- name: SS 1684
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/SS_1684.wav
+    description: Community voice donation (CC0).
+- name: STONE
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/STONE.wav
+    description: Community voice donation (CC0).
+- name: Samsewak
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Samsewak.wav
+    description: Community voice donation (CC0).
+- name: Selfie
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Selfie.wav
+    description: Community voice donation (CC0).
+- name: Sheddy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Sheddy.wav
+    description: Community voice donation (CC0).
+- name: Siddh Indian
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Siddh_Indian.wav
+    description: Community voice donation (CC0).
+- name: Sir TJ
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Sir_TJ.wav
+    description: Community voice donation (CC0).
+- name: Sirajo x
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Sirajo_x.wav
+    description: Community voice donation (CC0).
+- name: Sp46
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Sp46.wav
+    description: Community voice donation (CC0).
+- name: Sr Erick
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Sr_Erick.wav
+    description: Community voice donation (CC0).
+- name: Standollars
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Standollars.wav
+    description: Community voice donation (CC0).
+- name: TESLLA
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/TESLLA.wav
+    description: Community voice donation (CC0).
+- name: Tahii
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Tahii.wav
+    description: Community voice donation (CC0).
+- name: TheFin
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/TheFin.wav
+    description: Community voice donation (CC0).
+- name: The Sustainabler
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/The_Sustainabler.wav
+    description: Community voice donation (CC0).
+- name: The other brother
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/The_other_brother.wav
+    description: Community voice donation (CC0).
+- name: Titorium
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Titorium.wav
+    description: Community voice donation (CC0).
+- name: Tonmoy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Tonmoy.wav
+    description: Community voice donation (CC0).
+- name: Umair
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Umair.wav
+    description: Community voice donation (CC0).
+- name: Vexat
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Vexat.wav
+    description: Community voice donation (CC0).
+- name: Victor Garcia
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Victor_Garcia.wav
+    description: Community voice donation (CC0).
+- name: Vinith English India
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Vinith___English_India.wav
+    description: Community voice donation (CC0).
+- name: Vitch
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Vitch.wav
+    description: Community voice donation (CC0).
+- name: Vivaldi
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Vivaldi.wav
+    description: Community voice donation (CC0).
+- name: W A H
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/W_A_H.wav
+    description: Community voice donation (CC0).
+- name: Wealthiest
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Wealthiest.wav
+    description: Community voice donation (CC0).
+- name: WhisperInEar
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/WhisperInEar.wav
+    description: Community voice donation (CC0).
+- name: Yesid
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Yesid.wav
+    description: Community voice donation (CC0).
+- name: Youfied
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Youfied.wav
+    description: Community voice donation (CC0).
+- name: Yuush
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/Yuush.wav
+    description: Community voice donation (CC0).
+- name: aepeak
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/aepeak.wav
+    description: Community voice donation (CC0).
+- name: albertoforofo007
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/albertoforofo007.wav
+    description: Community voice donation (CC0).
+- name: amazon box
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/amazon_box.wav
+    description: Community voice donation (CC0).
+- name: awais shah
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/awais_shah.wav
+    description: Community voice donation (CC0).
+- name: bathri
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/bathri.wav
+    description: Community voice donation (CC0).
+- name: bevi
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/bevi.wav
+    description: Community voice donation (CC0).
+- name: boom
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/boom.wav
+    description: Community voice donation (CC0).
+- name: cybina
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/cybina.wav
+    description: Community voice donation (CC0).
+- name: dwp
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/dwp.wav
+    description: Community voice donation (CC0).
+- name: english with german accent
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/english_with_german_accent.wav
+    description: Community voice donation (CC0).
+- name: erihppas
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/erihppas.wav
+    description: Community voice donation (CC0).
+- name: floyd2026
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/floyd2026.wav
+    description: Community voice donation (CC0).
+- name: gmaskell92
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/gmaskell92.wav
+    description: Community voice donation (CC0).
+- name: gyroo
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/gyroo.wav
+    description: Community voice donation (CC0).
+- name: hielos 1
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/hielos_1.wav
+    description: Community voice donation (CC0).
+- name: hielos 2
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/hielos_2.wav
+    description: Community voice donation (CC0).
+- name: injul
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/injul.wav
+    description: Community voice donation (CC0).
+- name: kbrn1
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/kbrn1.wav
+    description: Community voice donation (CC0).
+- name: oldNerd
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/oldNerd.wav
+    description: Community voice donation (CC0).
+- name: oldNerd2
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/oldNerd2.wav
+    description: Community voice donation (CC0).
+- name: oldNerd3
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/oldNerd3.wav
+    description: Community voice donation (CC0).
+- name: ra XOr
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/ra_XOr.wav
+    description: Community voice donation (CC0).
+- name: rewi
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/rewi.wav
+    description: Community voice donation (CC0).
+- name: robert
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/robert.wav
+    description: Community voice donation (CC0).
+- name: rshah 1 0
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/rshah_1_0.wav
+    description: Community voice donation (CC0).
+- name: sanjay
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/sanjay.wav
+    description: Community voice donation (CC0).
+- name: siddharth khanna
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/siddharth_khanna.wav
+    description: Community voice donation (CC0).
+- name: solace
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/solace.wav
+    description: Community voice donation (CC0).
+- name: spanish-limaperu
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/spanish-limaperu.wav
+    description: Community voice donation (CC0).
+- name: stein
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/stein.wav
+    description: Community voice donation (CC0).
+- name: sujan daikoawaj
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/sujan_daikoawaj.wav
+    description: Community voice donation (CC0).
+- name: surazy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/surazy.wav
+    description: Community voice donation (CC0).
+- name: taiyo
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/taiyo.wav
+    description: Community voice donation (CC0).
+- name: temp-007
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/temp-007.wav
+    description: Community voice donation (CC0).
+- name: thepolishdane
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/thepolishdane.wav
+    description: Community voice donation (CC0).
+- name: utk
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/utk.wav
+    description: Community voice donation (CC0).
+- name: vinayak
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/vinayak.wav
+    description: Community voice donation (CC0).
+- name: virtu
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/virtu.wav
+    description: Community voice donation (CC0).
+- name: willbas
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/willbas.wav
+    description: Community voice donation (CC0).
+- name: yaemdluffy
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/yaemdluffy.wav
+    description: Community voice donation (CC0).
+- name: zerocool
+  good: true
+  category: Community Voices
+  instructions:
+    type: smalltalk
+  source:
+    source_type: file
+    path_on_server: voice-donations/zerocool.wav
+    description: Community voice donation (CC0).

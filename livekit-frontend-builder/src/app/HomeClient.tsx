@@ -92,6 +92,7 @@ function getSentimentColor(sentiment: string): string {
 export default function Home() {
   const [token, setToken] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [iceServers, setIceServers] = useState<RTCIceServer[] | undefined>(undefined);
 
   const handleConnect = useCallback(async () => {
     setConnecting(true);
@@ -99,6 +100,9 @@ export default function Home() {
       const resp = await fetch(TOKEN_URL);
       const data = await resp.json();
       setToken(data.token);
+      if (data.iceServers) {
+        setIceServers([data.iceServers]);
+      }
     } catch (e) {
       console.error("Failed to get token:", e);
       setConnecting(false);
@@ -133,7 +137,7 @@ export default function Home() {
             {connecting ? "Connecting..." : "Start Call"}
           </button>
           <p className="landing-footer">
-            Powered by Intelepeer Livekit Agent
+            Powered by Intelepeer Livekit Agent - Moshi Full Duplex - Qwen 3 4B
           </p>
         </div>
       </div>
@@ -147,6 +151,7 @@ export default function Home() {
       connect={true}
       audio={true}
       onDisconnected={handleDisconnect}
+      options={iceServers ? { rtcConfig: { iceServers } } : undefined}
     >
       <RoomAudioRenderer />
       <CallUI onDisconnect={handleDisconnect} />

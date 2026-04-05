@@ -1,0 +1,16 @@
+rtc:
+  port_range_start: 7882
+  port_range_end: 7882
+  tcp_port: 7881
+  node_ip: 99.66.11.228
+  use_ice_lite: false
+  stun_servers:
+    - stun.cloudflare.com:3478
+  interfaces:
+    excludes:
+      - vEthernet
+
+turn:
+  enabled: true
+  domain: moshi.digitalresponsetech.com
+  udp_port: 3478

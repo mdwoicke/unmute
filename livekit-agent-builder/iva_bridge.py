@@ -90,8 +90,9 @@ def _validate_extracted_slots(extracted: dict, utterance: str) -> dict:
     cleaned = dict(extracted)
 
     # Patterns that indicate a question, not a data value
+    # Match question words anywhere (not just start) — STT often prepends filler
     _QUESTION_WORDS = re.compile(
-        r'^(where|what|how|why|when|who|can|could|do|does|is|are|should|would)\b',
+        r'\b(where|what|how|why|when|who|can|could|do|does|is|are|should|would)\b.*\b(i|you|we|they|it|me|my|be|find|get)\b',
         re.IGNORECASE,
     )
     _HAS_QUESTION = re.compile(r'\?')
@@ -140,6 +141,48 @@ def _validate_extracted_slots(extracted: dict, utterance: str) -> dict:
     return cleaned
 
 
+def _is_question_utterance(original: str, preprocessed: str, session_state: dict) -> bool:
+    """Fast regex check if utterance is a question vs slot data.
+
+    Checks original (with punctuation) first, then preprocessed.
+    No LLM call — keeps latency zero on the hot path.
+    """
+    # Quick exit: clearly providing data (numeric, short words)
+    if re.match(r'^[\d\s\-]+$', preprocessed.strip()):
+        return False
+    if len(preprocessed.split()) < 3:
+        return False
+
+    # Trailing "?" after confirmation words is NOT a question
+    # e.g., "Yes, schedule, right?" or "Book a ride, okay?"
+    _CONFIRM_TAIL = re.compile(
+        r',?\s*(?:right|okay|ok|correct|yeah|yes|no|huh|eh)\s*\??\s*$',
+        re.IGNORECASE,
+    )
+    # If the utterance is primarily an intent/statement with a trailing tag question, skip
+    clean = _CONFIRM_TAIL.sub('', original).strip()
+    if clean and '?' not in clean:
+        # The only ? was in a tag question — not a real question
+        return False
+
+    # Question word + pronoun/verb pattern
+    _Q_PATTERN = re.compile(
+        r'\b(where|what|how|why|when|who|can|could|do|does|is|are|should|would)\b.*\b(i|you|we|they|it|me|my|be|find|get)\b',
+        re.IGNORECASE,
+    )
+    # Or: starts with question word and ends with ?
+    _Q_WORD_PLUS_MARK = re.compile(
+        r'\b(where|what|how|why|when|who|can|could|do|does|is|are|should|would)\b.*\?',
+        re.IGNORECASE,
+    )
+    for text in (original, preprocessed):
+        if _Q_PATTERN.search(text):
+            return True
+        if _Q_WORD_PLUS_MARK.search(text):
+            return True
+    return False
+
+
 def _generate_conversational_response(
     utterance: str, session_state: dict, template_response: str
 ) -> str | None:
@@ -173,7 +216,7 @@ def _generate_conversational_response(
     stage_info = _STAGE_INFO.get(stage, "the requested information")
 
     prompt = (
-        f"You are a friendly NEMT (medical transportation) phone agent. "
+        f"You are Ally, a friendly Nations Benefits NEMT (medical transportation) phone agent. "
         f"You just asked the caller for {stage_info}. "
         f"The caller responded: \"{utterance}\"\n\n"
         f"They are asking a question or need clarification. "
@@ -214,7 +257,7 @@ def _generate_conversational_response(
     return None
 
 
-def _preprocess_utterance(utterance: str) -> str:
+def _preprocess_utterance(utterance: str, stage: str = "") -> str:
     """Fast preprocessing for voice utterances.
 
     1. Strip trailing sentence punctuation (not abbreviation dots)
@@ -252,6 +295,172 @@ def _preprocess_utterance(utterance: str) -> str:
         lambda m: re.sub(r'[,\s]+', '', m.group(0)),
         text,
     )
+
+    # Strip conversational preamble from address-like utterances so the IVA
+    # stores "Mary Dooley Hospital" not "I'm heading to Mary Dooley Hospital".
+    # Only strip if the remainder looks like an actual place (has a capital letter,
+    # number, or known location word) — don't strip questions like
+    # "Where am I going to be dropped off?"
+    def _strip_preamble(pattern, txt):
+        m = re.match(pattern, txt, flags=re.IGNORECASE)
+        if m:
+            remainder = txt[m.end():].strip()
+            # Only strip if remainder looks like an address/place name
+            if remainder and (
+                re.search(r'\d', remainder)
+                or re.search(r'[A-Z]', remainder)
+                or re.search(r'\b(hospital|clinic|center|street|ave|road|dr|blvd)\b', remainder, re.IGNORECASE)
+            ):
+                return remainder
+        return txt
+
+    text = _strip_preamble(
+        r"(?:i'm\s+)?(?:heading|going|traveling|driving|riding)\s+to\s+", text
+    )
+    text = _strip_preamble(
+        r"(?:pick\s+(?:me\s+)?up\s+(?:from|at)\s+|"
+        r"i\s+(?:live|am|stay)\s+(?:at|on|in)\s+|"
+        r"it'?s?\s+(?:at|on)\s+|"
+        r"(?:the\s+)?address\s+is\s+)",
+        text,
+    )
+
+    # Companion-specific preprocessing: only run at companion stage to avoid
+    # matching bare numbers like "one" or "nine" at other stages.
+    if stage == "companion":
+        _COMP_REL = re.compile(
+            r'\b(?:just\s+)?(?:my\s+)?(son|daughter|wife|husband|mom|dad|mother|father|brother|sister|friend)\b',
+            re.IGNORECASE,
+        )
+        _COMP_COUNT = re.compile(
+            r'^(?:just\s+|only\s+)?(?:(\d)|one|two|three|a couple)(?:\s+(?:person|people|companion|companions))?$',
+            re.IGNORECASE,
+        )
+        _COMP_NONE = re.compile(
+            r'^(?:none|no|no one|nobody|just me|0)$',
+            re.IGNORECASE,
+        )
+        _COUNT_MAP = {"one": "1", "two": "2", "three": "3", "a couple": "2"}
+
+        rel_match = _COMP_REL.search(text)
+        if rel_match:
+            relationship = rel_match.group(1).lower()
+            relationship = {"mother": "mom", "father": "dad"}.get(relationship, relationship)
+            text = f"1 companion {relationship}"
+        elif _COMP_NONE.match(text.strip()):
+            text = "0 companions"
+        else:
+            count_match = _COMP_COUNT.match(text.strip())
+            if count_match:
+                digit = count_match.group(1)
+                if digit:
+                    text = f"{digit} companions"
+                else:
+                    raw = text.strip().lower()
+                    for word, d in _COUNT_MAP.items():
+                        if word in raw:
+                            text = f"{d} companions"
+                            break
+
+    # Resolve relative dates to absolute dates so IVA regex/template paths
+    # can parse them without needing an LLM call.
+    from datetime import datetime, timedelta
+    now = datetime.now()
+
+    def _ordinal(day):
+        """Convert day number to ordinal: 1->1st, 2->2nd, 3->3rd, 5->5th, etc."""
+        if 11 <= day <= 13:
+            return f"{day}th"
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+        return f"{day}{suffix}"
+
+    def _format_date(dt):
+        """Format date as 'April 5th' — TTS-friendly ordinal format."""
+        return f"{dt.strftime('%B')} {_ordinal(dt.day)}"
+
+    def _resolve_date(match):
+        word = match.group(0).lower()
+        if word == "today":
+            return _format_date(now)
+        elif word in ("tomorrow", "tmrw", "tmw"):
+            return _format_date(now + timedelta(days=1))
+        elif word == "yesterday":
+            return _format_date(now - timedelta(days=1))
+        return match.group(0)
+
+    text = re.sub(r'\b(today|tomorrow|tmrw|tmw|yesterday)\b', _resolve_date, text, flags=re.IGNORECASE)
+
+    # "next Monday", "next Tuesday", etc.
+    _DAYS = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
+             "friday": 4, "saturday": 5, "sunday": 6}
+    def _resolve_next_day(match):
+        day_name = match.group(1).lower()
+        if day_name in _DAYS:
+            target = _DAYS[day_name]
+            days_ahead = (target - now.weekday()) % 7
+            if days_ahead == 0:
+                days_ahead = 7
+            return _format_date(now + timedelta(days=days_ahead))
+        return match.group(0)
+
+    text = re.sub(
+        r'\bnext\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b',
+        _resolve_next_day, text, flags=re.IGNORECASE,
+    )
+
+    # Normalize time expressions to standard format (e.g., "9 AM", "2:30 PM")
+    # STT often produces "nine a.m." or "two thirty" or "nine in the morning"
+    def _normalize_time(match):
+        full = match.group(0)
+        hour = match.group(1)
+        minutes = match.group(2) or ""
+        period = (match.group(3) or "").strip().lower().replace(".", "")
+
+        # Map period words
+        if period in ("am", "a m"):
+            period = "AM"
+        elif period in ("pm", "p m"):
+            period = "PM"
+        elif "morning" in full.lower():
+            period = "AM"
+        elif "afternoon" in full.lower() or "evening" in full.lower():
+            period = "PM"
+        else:
+            # Guess based on hour for appointments (9-11 = AM, 12-6 = PM)
+            try:
+                h = int(hour)
+                period = "AM" if 7 <= h <= 11 else "PM"
+            except ValueError:
+                period = ""
+
+        time_str = hour
+        if minutes:
+            time_str += f":{minutes}"
+        if period:
+            time_str += f" {period}"
+        return time_str
+
+    # Match patterns like "9 a.m.", "2:30 PM", "9 in the morning"
+    # Require either a period marker OR colon+minutes — don't match bare numbers
+    text = re.sub(
+        r'\b(\d{1,2}):(\d{2})\s*'
+        r'(a\.?m\.?|p\.?m\.?|AM|PM|a m|p m)?',
+        _normalize_time, text, flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r'\b(\d{1,2})\s+'
+        r'()(a\.?m\.?|p\.?m\.?|AM|PM|a m|p m|in the morning|in the afternoon|in the evening)',
+        _normalize_time, text, flags=re.IGNORECASE,
+    )
+
+    # "this morning/afternoon/evening" → today's date + period
+    _PERIOD_MAP = {
+        "this morning": f"{now.strftime('%B %d')} morning",
+        "this afternoon": f"{now.strftime('%B %d')} afternoon",
+        "this evening": f"{now.strftime('%B %d')} evening",
+    }
+    for phrase, replacement in _PERIOD_MAP.items():
+        text = re.sub(r'\b' + phrase + r'\b', replacement, text, flags=re.IGNORECASE)
 
     return text
 
@@ -360,20 +569,37 @@ class IVABridge:
         # Minimal voice preprocessing (trailing punctuation only —
         # the heavy lifting is done by the voice-aware nemt_intake LLM)
         original = utterance
-        utterance = _preprocess_utterance(utterance)
+        current_stage = session_state.get("current_stage", "greeting")
+
+        # Fragment buffering: at collect_time stage, STT often splits
+        # "Tomorrow at 2 p.m." into "Tomorrow at 2" + "p.m." as separate turns.
+        # Buffer the first part and merge with AM/PM fragment.
+        if not hasattr(self, '_time_buffer'):
+            self._time_buffer = None
+
+        if current_stage == "collect_time":
+            stripped = utterance.strip().lower().rstrip('.')
+            # If this is just an AM/PM fragment, merge with buffer
+            if stripped in ("a.m.", "am", "p.m.", "pm", "a m", "p m") and self._time_buffer:
+                utterance = f"{self._time_buffer} {utterance}"
+                logger.info(f"Time fragment merged: '{utterance}'")
+                self._time_buffer = None
+            # If this has a number but no AM/PM, buffer it for next turn
+            elif re.search(r'\d', utterance) and not re.search(r'(?i)(a\.?m\.?|p\.?m\.?|AM|PM|morning|afternoon|evening)', utterance):
+                self._time_buffer = utterance
+                logger.info(f"Time fragment buffered: '{utterance}' (waiting for AM/PM)")
+                # Don't return yet — still process it, but if it fails the buffer is ready
+            else:
+                self._time_buffer = None
+
+        utterance = _preprocess_utterance(utterance, stage=current_stage)
         if utterance != original:
             logger.info(f"Preprocessed utterance: '{original}' -> '{utterance}'")
 
-        # Voice interception: if the utterance is clearly a question (not a
-        # slot answer), don't send it to the IVA at all — answer it with
-        # the LLM and re-prompt with the current stage's template question.
-        # This prevents the IVA from storing "Where can I be picked up from?"
-        # as a pickup_address.
-        _Q_PATTERN = re.compile(
-            r'(\?$|^(where|what|how|why|when|who|can|could|do|does|is|are|should|would)\b)',
-            re.IGNORECASE
-        )
-        if _Q_PATTERN.search(utterance):
+        # Voice interception: use the LLM to classify whether the utterance
+        # is a question/clarification vs actual slot data. This handles edge
+        # cases like "Or can I be picked up from?" that regex patterns miss.
+        if _is_question_utterance(original, utterance, session_state):
             from iva_middleware import get_response_templates
             templates = get_response_templates()
             stage = session_state.get("current_stage", "greeting")
@@ -444,28 +670,12 @@ class IVABridge:
         # Only trigger for actual questions — NOT for slot-providing utterances
         # that the IVA just failed to parse (numbers, addresses, etc.)
         response_src = graph_result.get("response_source", "template")
-        no_progress = (
-            not graph_result.get("stage_changed", False)
-            and not any(v is not None for v in graph_result.get("extracted_slots", {}).values())
-            and graph_result.get("intent") is None
-        )
-        _QUESTION_PATTERN = re.compile(
-            r'(\?|^(where|what|how|why|when|who|can|could|do|does|is|are|should|would)\b)',
-            re.IGNORECASE
-        )
-        is_question = bool(_QUESTION_PATTERN.search(utterance)) if utterance else False
-        if no_progress and response_src == "template" and is_question:
-            llm_answer = _generate_conversational_response(
-                utterance, session_state, graph_result.get("response", "")
-            )
-            if llm_answer:
-                graph_result["response"] = llm_answer + " " + graph_result.get("response", "")
-                logger.info(f"Voice LLM fallback: '{llm_answer[:80]}...'")
 
-        # Voice slot validation: the nemt_intake LLM sometimes extracts
+        # Voice slot validation FIRST: the nemt_intake LLM sometimes extracts
         # questions or nonsense as slot values (e.g., "Where can I be picked up?"
         # stored as pickup_address). Validate both extracted_slots and the
         # merged slots dict — remove invalid values so the IVA re-asks.
+        slots_were_removed = False
         for slots_key in ("extracted_slots", "slots"):
             slots_dict = graph_result.get(slots_key, {})
             if slots_dict and any(v is not None for v in slots_dict.values()):
@@ -475,9 +685,79 @@ class IVABridge:
                 if removed:
                     logger.info(f"Voice validation removed bad {slots_key}: {removed}")
                     graph_result[slots_key] = cleaned
+                    slots_were_removed = True
                     if slots_key == "slots":
                         # Prevent stage advancement if we removed key slots
                         graph_result["stage_changed"] = False
+
+        # Re-evaluate progress after slot validation (bad slots may have been removed)
+        no_progress = (
+            not graph_result.get("stage_changed", False)
+            and not any(v is not None for v in graph_result.get("extracted_slots", {}).values())
+            and graph_result.get("intent") is None
+        )
+        # Detect questions using same logic as _is_question_utterance
+        is_question = _is_question_utterance(original, utterance, session_state)
+        if (no_progress or slots_were_removed) and is_question:
+            llm_answer = _generate_conversational_response(
+                original or utterance, session_state, graph_result.get("response", "")
+            )
+            if llm_answer:
+                # If slots were removed, replace the bad response entirely
+                if slots_were_removed:
+                    graph_result["response"] = llm_answer
+                else:
+                    graph_result["response"] = llm_answer + " " + graph_result.get("response", "")
+                logger.info(f"Voice question intercepted: '{(original or utterance)[:50]}' -> LLM answer + re-prompt")
+
+        # ── Post-IVA companion extraction fallback ──────────────────────
+        # If we're stuck on the companion stage and the IVA didn't extract
+        # companion slots, try regex patterns on the utterance directly.
+        _cur_stage = graph_result.get("stage", session_state.get("current_stage", ""))
+        _extracted = graph_result.get("extracted_slots", {})
+        _has_companion_slots = (
+            _extracted.get("number_of_companions") is not None
+            or _extracted.get("companion_relationship") is not None
+        )
+        if _cur_stage == "companion" and not _has_companion_slots:
+            _fb_rel = re.search(
+                r'\b(?:just\s+)?(?:my\s+)?(son|daughter|wife|husband|mom|dad|mother|father|brother|sister|friend)\b',
+                utterance, re.IGNORECASE,
+            )
+            _fb_none = re.match(
+                r'^(?:none|no|no one|nobody|just me|0)$',
+                utterance.strip(), re.IGNORECASE,
+            )
+            _fb_count = re.match(
+                r'^(?:just\s+|only\s+)?(\d)(?:\s+(?:person|people|companion|companions?))?$',
+                utterance.strip(), re.IGNORECASE,
+            )
+            injected = {}
+            if _fb_rel:
+                rel = _fb_rel.group(1).lower()
+                rel = {"mother": "mom", "father": "dad"}.get(rel, rel)
+                injected = {"number_of_companions": 1, "companion_relationship": rel}
+            elif _fb_none:
+                injected = {"number_of_companions": 0}
+            elif _fb_count:
+                injected = {"number_of_companions": int(_fb_count.group(1))}
+            else:
+                # Try word-based counts
+                _word_counts = {"one": 1, "two": 2, "three": 3, "a couple": 2}
+                _utt_lower = utterance.strip().lower()
+                for _wrd, _cnt in _word_counts.items():
+                    if _wrd in _utt_lower:
+                        injected = {"number_of_companions": _cnt}
+                        break
+
+            if injected:
+                logger.info(f"Companion fallback extracted: {injected} from '{utterance}'")
+                # Inject into graph_result so downstream state update picks it up
+                for _sk, _sv in injected.items():
+                    graph_result.setdefault("extracted_slots", {})[_sk] = _sv
+                    graph_result.setdefault("slots", {})[_sk] = _sv
+                # Advance stage since we now have the companion data
+                graph_result["stage_changed"] = True
 
         # Update session state from graph result (same key-by-key logic as web_app.py lines 1914-1924)
         for key in ("sentiment_history", "stage_attempts", "history", "primary_intent"):

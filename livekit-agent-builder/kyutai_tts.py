@@ -109,8 +109,11 @@ class KyutaiChunkedStream(tts.ChunkedStream):
                 mime_type="audio/pcm",
             )
 
+            # Clean text for TTS — strip trailing periods that get spoken as "dot"
+            import re
+            clean_text = re.sub(r'\.(\s|$)', r'\1', text).strip()
             # Send text + EOS
-            await ws.send(msgpack.packb({"type": "Text", "text": text}))
+            await ws.send(msgpack.packb({"type": "Text", "text": clean_text}))
             await ws.send(msgpack.packb({"type": "Eos"}))
 
             # Receive audio and push to emitter

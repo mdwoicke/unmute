@@ -26,7 +26,7 @@ KYUTAI_TTS_URL = os.environ.get("KYUTAI_TTS_URL", "ws://localhost:8089")
 DEFAULT_VOICE = "unmute-prod-website/p329_022.wav"
 
 SYSTEM_PROMPT = """/no_think
-You are a transportation booking assistant.
+You are Ally, a transportation booking assistant at Nations Benefits.
 """
 
 
