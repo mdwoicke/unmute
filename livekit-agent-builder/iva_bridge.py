@@ -16,6 +16,8 @@ import sys
 import time
 import uuid
 
+from utterance_analyzer import analyze_utterance
+
 logger = logging.getLogger(__name__)
 
 # ── Voice-aware IVA integration ────────────────────────────────────────
@@ -592,53 +594,129 @@ class IVABridge:
             else:
                 self._time_buffer = None
 
-        utterance = _preprocess_utterance(utterance, stage=current_stage)
-        if utterance != original:
-            logger.info(f"Preprocessed utterance: '{original}' -> '{utterance}'")
+        # ── Utterance Analysis (A/B testable) ────────────────────────
+        analysis_mode = os.environ.get("UTTERANCE_ANALYZER", "hybrid").lower()
 
-        # Voice interception: use the LLM to classify whether the utterance
-        # is a question/clarification vs actual slot data. This handles edge
-        # cases like "Or can I be picked up from?" that regex patterns miss.
-        if _is_question_utterance(original, utterance, session_state):
-            from iva_middleware import get_response_templates
-            templates = get_response_templates()
-            stage = session_state.get("current_stage", "greeting")
-            template_resp = templates.get_response(stage, "opening", session_state.get("slots", {}))
-            if not template_resp:
-                template_resp = templates.get_reprompt_for_slots(
-                    stage, [], session_state.get("slots", {})
-                ) or ""
+        if analysis_mode == "legacy":
+            # Original behavior — regex preprocessing + separate question detection
+            utterance = _preprocess_utterance(utterance, stage=current_stage)
+            if utterance != original:
+                logger.info(f"Preprocessed utterance: '{original}' -> '{utterance}'")
 
-            llm_answer = _generate_conversational_response(
-                utterance, session_state, template_resp
+            if _is_question_utterance(original, utterance, session_state):
+                from iva_middleware import get_response_templates
+                templates = get_response_templates()
+                stage = session_state.get("current_stage", "greeting")
+                template_resp = templates.get_response(stage, "opening", session_state.get("slots", {}))
+                if not template_resp:
+                    template_resp = templates.get_reprompt_for_slots(
+                        stage, [], session_state.get("slots", {})
+                    ) or ""
+                llm_answer = _generate_conversational_response(
+                    utterance, session_state, template_resp
+                )
+                combined = (llm_answer + " " + template_resp).strip() if llm_answer else template_resp
+                if session_state.get("history"):
+                    session_state["history"][-1]["agent_response"] = combined
+                logger.info(f"Voice question intercepted: '{utterance}' -> LLM answer + re-prompt")
+                return {
+                    "session_id": self.session_id,
+                    "turn": session_state.get("turn_count", 0),
+                    "stage": stage,
+                    "previous_stage": stage,
+                    "stage_changed": False,
+                    "intent_detected": None,
+                    "response": combined,
+                    "response_source": "voice_llm",
+                    "sentiment": "neutral",
+                    "behavioral_mode": session_state.get("sentiment_mode", "normal"),
+                    "slots_extracted": {},
+                    "slots_accumulated": {k: v for k, v in session_state.get("slots", {}).items() if v is not None},
+                    "call_complete": False,
+                    "escalated": False,
+                    "stages_skipped": [],
+                    "digression_handled": "question",
+                    "verification": None,
+                    "elapsed_ms": 0,
+                }
+        else:
+            # Pydantic / Hybrid mode — single structured LLM call
+            analysis = await analyze_utterance(
+                utterance=utterance,
+                stage=current_stage,
+                collected_slots=session_state.get("slots", {}),
+                history=session_state.get("history", []),
             )
-            combined = (llm_answer + " " + template_resp).strip() if llm_answer else template_resp
+            logger.info(f"Analysis result: type={analysis.utterance_type}, "
+                        f"question={analysis.is_question}, conf={analysis.confidence}")
 
-            # Backfill into history for context
-            if session_state.get("history"):
-                session_state["history"][-1]["agent_response"] = combined
+            utterance = analysis.normalized_utterance
 
-            logger.info(f"Voice question intercepted: '{utterance}' -> LLM answer + re-prompt")
-            return {
-                "session_id": self.session_id,
-                "turn": session_state.get("turn_count", 0),
-                "stage": stage,
-                "previous_stage": stage,
-                "stage_changed": False,
-                "intent_detected": None,
-                "response": combined,
-                "response_source": "voice_llm",
-                "sentiment": "neutral",
-                "behavioral_mode": session_state.get("sentiment_mode", "normal"),
-                "slots_extracted": {},
-                "slots_accumulated": {k: v for k, v in session_state.get("slots", {}).items() if v is not None},
-                "call_complete": False,
-                "escalated": False,
-                "stages_skipped": [],
-                "digression_handled": "question",
-                "verification": None,
-                "elapsed_ms": 0,
-            }
+            # If the analyzer identified a question and produced a response, return directly
+            if analysis.is_question and analysis.conversational_response:
+                from iva_middleware import get_response_templates
+                templates = get_response_templates()
+                stage = session_state.get("current_stage", "greeting")
+                template_resp = templates.get_response(stage, "opening", session_state.get("slots", {}))
+                if not template_resp:
+                    template_resp = templates.get_reprompt_for_slots(
+                        stage, [], session_state.get("slots", {})
+                    ) or ""
+                answer = analysis.tts_response or analysis.conversational_response
+                combined = (answer + ",,,  " + template_resp).strip() if template_resp else answer
+                if session_state.get("history"):
+                    session_state["history"][-1]["agent_response"] = combined
+                logger.info(f"Analyzer question intercepted: '{original}' -> '{answer}'")
+                return {
+                    "session_id": self.session_id,
+                    "turn": session_state.get("turn_count", 0),
+                    "stage": stage,
+                    "previous_stage": stage,
+                    "stage_changed": False,
+                    "intent_detected": None,
+                    "response": combined,
+                    "response_source": "voice_analyzer",
+                    "sentiment": "neutral",
+                    "behavioral_mode": session_state.get("sentiment_mode", "normal"),
+                    "slots_extracted": analysis.slot_values,
+                    "slots_accumulated": {k: v for k, v in session_state.get("slots", {}).items() if v is not None},
+                    "call_complete": False,
+                    "escalated": False,
+                    "stages_skipped": [],
+                    "digression_handled": "question",
+                    "verification": None,
+                    "elapsed_ms": 0,
+                }
+
+            # Filter noise/fragments with high confidence
+            if analysis.utterance_type in ("noise", "fragment") and analysis.confidence > 0.8:
+                logger.info(f"Analyzer filtered {analysis.utterance_type}: '{original}'")
+                from iva_middleware import get_response_templates
+                templates = get_response_templates()
+                stage = session_state.get("current_stage", "greeting")
+                reprompt = templates.get_reprompt_for_slots(
+                    stage, [], session_state.get("slots", {})
+                ) or "Could you say that again?"
+                return {
+                    "session_id": self.session_id,
+                    "turn": session_state.get("turn_count", 0),
+                    "stage": stage,
+                    "previous_stage": stage,
+                    "stage_changed": False,
+                    "intent_detected": None,
+                    "response": reprompt,
+                    "response_source": "voice_analyzer",
+                    "sentiment": "neutral",
+                    "behavioral_mode": session_state.get("sentiment_mode", "normal"),
+                    "slots_extracted": {},
+                    "slots_accumulated": {k: v for k, v in session_state.get("slots", {}).items() if v is not None},
+                    "call_complete": False,
+                    "escalated": False,
+                    "stages_skipped": [],
+                    "digression_handled": "noise",
+                    "verification": None,
+                    "elapsed_ms": 0,
+                }
 
         # Voice compensation: if the previous turn was a wasted fragment
         # (no intent, no slots, stage unchanged), reset the stage_attempts
