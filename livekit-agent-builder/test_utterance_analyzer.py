@@ -115,11 +115,10 @@ def test_prompt_includes_tts_formatting_rules():
 
 
 def test_prompt_includes_conversation_history():
-    """Prompt includes recent conversation turns for context."""
+    """Prompt includes recent conversation turns using iva_bridge history format."""
     history = [
-        {"role": "user", "content": "I need a ride"},
-        {"role": "assistant", "content": "Sure, when is your appointment?"},
-        {"role": "user", "content": "next wednesday"},
+        {"utterance": "I need a ride", "agent_response": "Sure, when is your appointment?"},
+        {"utterance": "next wednesday", "agent_response": None},
     ]
     prompt = build_analysis_prompt("next wednesday at 2", "collect_time", {}, history)
     assert "I need a ride" in prompt

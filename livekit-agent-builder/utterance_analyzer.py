@@ -19,7 +19,7 @@ from datetime import datetime
 from typing import Any, Literal
 
 import httpx
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class UtteranceAnalysis(BaseModel):
     is_question: bool = False
     conversational_response: str | None = None  # answer if question
     tts_response: str | None = None  # voice-formatted (no periods, ,,, for pauses)
-    confidence: float  # 0.0-1.0
+    confidence: float = Field(ge=0.0, le=1.0)  # 0.0-1.0
     reasoning: str = ""  # for logging
 
     @field_validator("tts_response", mode="before")
@@ -46,6 +46,7 @@ class UtteranceAnalysis(BaseModel):
         v = re.sub(r"\*+", "", v)
         v = re.sub(r"_+", "", v)
         v = re.sub(r"`+", "", v)
+        v = re.sub(r"#+\s*", "", v)
         # Strip trailing periods (TTS says "dot")
         v = v.rstrip(".")
         return v
@@ -85,9 +86,12 @@ def build_analysis_prompt(
     if recent_history:
         lines = []
         for turn in recent_history:
-            role = turn.get("role", "unknown")
-            text = turn.get("content", turn.get("text", ""))
-            lines.append(f"  {role}: {text}")
+            caller_text = turn.get("utterance", turn.get("content", turn.get("text", "")))
+            agent_text = turn.get("agent_response", "")
+            if caller_text:
+                lines.append(f"  Caller: {caller_text}")
+            if agent_text:
+                lines.append(f"  Agent: {agent_text}")
         history_block = "\n".join(lines)
 
     slots_json = json.dumps(collected_slots, indent=2) if collected_slots else "{}"
@@ -220,11 +224,12 @@ def _is_trivial(utterance: str) -> UtteranceAnalysis | None:
             reasoning="negative keyword",
         )
 
-    if re.fullmatch(r"\d+", cleaned):
+    if re.fullmatch(r"[\d\s\-,]+", cleaned) and re.search(r"\d", cleaned):
+        digits = re.sub(r"[^\d]", "", cleaned)
         return UtteranceAnalysis(
             utterance_type="slot_data",
-            normalized_utterance=cleaned,
-            slot_values={"digits": cleaned},
+            normalized_utterance=digits,
+            slot_values={"digits": digits},
             confidence=1.0,
             reasoning="pure digits",
         )
