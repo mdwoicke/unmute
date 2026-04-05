@@ -96,3 +96,39 @@ def test_tts_response_strips_markdown():
         reasoning="test",
     )
     assert "**" not in a.tts_response
+
+
+def test_prompt_resolves_next_wednesday():
+    """Prompt gives LLM enough context to resolve 'next wednesday'."""
+    prompt = build_analysis_prompt("next wednesday at 2 pm", "collect_time", {}, [])
+    # Must contain day of week so LLM can calculate
+    assert any(d in prompt for d in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+    # Must contain full year
+    assert "2026" in prompt
+
+
+def test_prompt_includes_tts_formatting_rules():
+    """Prompt instructs LLM about TTS formatting."""
+    prompt = build_analysis_prompt("test", "greeting", {}, [])
+    assert ",,," in prompt  # breath pause instruction
+    assert "period" in prompt.lower() or "dot" in prompt.lower()  # no-periods rule
+
+
+def test_prompt_includes_conversation_history():
+    """Prompt includes recent conversation turns for context."""
+    history = [
+        {"role": "user", "content": "I need a ride"},
+        {"role": "assistant", "content": "Sure, when is your appointment?"},
+        {"role": "user", "content": "next wednesday"},
+    ]
+    prompt = build_analysis_prompt("next wednesday at 2", "collect_time", {}, history)
+    assert "I need a ride" in prompt
+    assert "when is your appointment" in prompt
+
+
+def test_prompt_includes_collected_slots():
+    """Prompt shows already-collected slot values."""
+    slots = {"member_id": "1234", "pickup_address": "123 Main St"}
+    prompt = build_analysis_prompt("2 pm tomorrow", "collect_time", slots, [])
+    assert "1234" in prompt
+    assert "123 Main St" in prompt
